@@ -1,0 +1,65 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FreshStart SOC Monitor</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">FreshStart SOC</p>
+          <h1>Real-Time Alert Monitor</h1>
+          <p class="hero-copy">Streaming Wazuh syslog alerts into a SOC-style timeline.</p>
+        </div>
+        <div class="hero-actions">
+          <span id="stream-status" class="pill">Connecting...</span>
+          <div class="counters">
+            <div class="counter">
+              <span class="counter-label">Total</span>
+              <span id="total-count" class="counter-value">0</span>
+            </div>
+            <div class="counter critical">
+              <span class="counter-label">Critical</span>
+              <span id="critical-count" class="counter-value">0</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Latest Alerts</h2>
+          <div class="panel-meta">
+            <span class="muted">Newest alerts appear on top</span>
+            <div id="top-rules" class="top-rules"></div>
+          </div>
+        </div>
+        <div id="error-banner" class="error-banner hidden"></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Rule ID</th>
+                <th>Description</th>
+                <th>Severity</th>
+                <th>Agent Name</th>
+                <th>Agent IP</th>
+              </tr>
+            </thead>
+            <tbody id="alerts-body">
+              <tr>
+                <td colspan="6" class="muted">Waiting for syslog alerts...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <script src="/script.js"></script>
+  </body>
+</html>
