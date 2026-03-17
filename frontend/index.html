@@ -3,63 +3,309 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FreshStart SOC Monitor</title>
+    <title>FreshStart SOC</title>
     <link rel="stylesheet" href="/styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
   </head>
   <body>
-    <div class="page-shell">
-      <header class="hero">
-        <div>
-          <p class="eyebrow">FreshStart SOC</p>
-          <h1>Real-Time Alert Monitor</h1>
-          <p class="hero-copy">Streaming Wazuh syslog alerts into a SOC-style timeline.</p>
-        </div>
-        <div class="hero-actions">
-          <span id="stream-status" class="pill">Connecting...</span>
-          <div class="counters">
-            <div class="counter">
-              <span class="counter-label">Total</span>
-              <span id="total-count" class="counter-value">0</span>
-            </div>
-            <div class="counter critical">
-              <span class="counter-label">Critical</span>
-              <span id="critical-count" class="counter-value">0</span>
-            </div>
+    <div id="app-content">
+      <nav class="navbar">
+        <div class="nav-left">
+          <span class="brand">FreshStart SOC</span>
+          <div class="nav-links">
+            <a href="/index.html" class="active">Dashboard</a>
+            <a href="/alerts.html">Alerts</a>
+            <a href="/investigations.html">Investigations</a>
+            <a href="/assets.html">Assets</a>
+            <a href="/active-response.html">Active Response</a>
+            <a href="/settings.html">Settings</a>
           </div>
+        </div>
+        <div class="nav-right">
+          <div class="status-chip">
+            <span class="status-dot live"></span>
+            System Status: Live
+          </div>
+          <div class="status-chip">
+            <span class="status-dot warn"></span>
+            Wazuh: Connected
+          </div>
+          <div class="status-chip">
+            Response Mode: Detect Only
+          </div>
+          <span id="stream-status" class="pill live-badge">Live</span>
+          <button id="lock-button" class="ghost lock-button" type="button">Lock</button>
+        </div>
+      </nav>
+
+      <div class="page-shell">
+      <header class="page-header">
+        <div>
+          <p class="eyebrow">Security Operations Center</p>
+          <h1>Security Operations Dashboard</h1>
+          <p class="hero-copy">Real-time threat detection, monitoring, and automated response.</p>
         </div>
       </header>
 
-      <section class="panel">
-        <div class="panel-head">
-          <h2>Latest Alerts</h2>
-          <div class="panel-meta">
-            <span class="muted">Newest alerts appear on top</span>
-            <div id="top-rules" class="top-rules"></div>
+      <section class="metrics-panels metrics-grid">
+        <div class="metric-card critical">
+          <span class="metric-label">Total Alerts</span>
+          <div class="metric-value">
+            <span id="metric-total">0</span>
+            <span class="metric-trend">▲</span>
           </div>
+          <span class="metric-subtitle">▲ +14 last hour</span>
         </div>
-        <div id="error-banner" class="error-banner hidden"></div>
-        <div class="table-wrap">
+        <div class="metric-card critical">
+          <span class="metric-label">Critical Alerts</span>
+          <div class="metric-value">
+            <span id="metric-critical">0</span>
+            <span class="metric-trend">▲</span>
+          </div>
+          <span class="metric-subtitle">▲ +4 last hour</span>
+        </div>
+        <div class="metric-card high">
+          <span class="metric-label">High Severity Alerts</span>
+          <div class="metric-value">
+            <span id="metric-high">0</span>
+            <span class="metric-trend">▲</span>
+          </div>
+          <span class="metric-subtitle">▲ +9 last hour</span>
+        </div>
+        <div class="metric-card low">
+          <span class="metric-label">Active Agents</span>
+          <div class="metric-value">
+            <span id="metric-agents">0</span>
+            <span class="metric-trend">▲</span>
+          </div>
+          <span class="metric-subtitle">▲ +2 last hour</span>
+        </div>
+        <div class="metric-card medium">
+          <span class="metric-label">Suspicious IPs</span>
+          <div class="metric-value">
+            <span id="metric-suspicious">0</span>
+            <span class="metric-trend">▲</span>
+          </div>
+          <span class="metric-subtitle">▲ +3 last hour</span>
+        </div>
+        <div class="metric-card low">
+          <span class="metric-label">Events Processed</span>
+          <div class="metric-value">
+            <span id="metric-events">0</span>
+            <span class="metric-trend">▲</span>
+          </div>
+          <span class="metric-subtitle">Events processed in system</span>
+        </div>
+      </section>
+
+      <section class="metrics-panels metrics-grid">
+        <div class="metric-card">
+          <span class="metric-label">Open Investigations</span>
+          <div class="metric-value">
+            <span id="metric-open-cases">0</span>
+            <span class="metric-trend">▲</span>
+          </div>
+          <span class="metric-subtitle">Active SOC cases</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Alerts Resolved Today</span>
+          <div class="metric-value">
+            <span id="metric-resolved-today">0</span>
+            <span class="metric-trend">▲</span>
+          </div>
+          <span class="metric-subtitle">Closed in last 24h</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Mean Time to Respond</span>
+          <div class="metric-value">
+            <span id="metric-mttr">—</span>
+            <span class="metric-trend">▼</span>
+          </div>
+          <span class="metric-subtitle">Awaiting case data</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Active Analysts</span>
+          <div class="metric-value">
+            <span id="metric-analysts">1</span>
+            <span class="metric-trend">▲</span>
+          </div>
+          <span class="metric-subtitle">On console now</span>
+        </div>
+      </section>
+
+      <section class="analytics-panels grid-two">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Alerts by Severity</h2>
+            <p class="muted">Last 60 minutes · <span id="updated-severity">Last updated: —</span></p>
+          </div>
+          <canvas id="severity-chart" height="180"></canvas>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Alert Timeline</h2>
+            <p class="muted">Notable events over time · <span id="updated-timeline">Last updated: —</span></p>
+          </div>
+          <canvas id="timeline-chart" height="180"></canvas>
+        </div>
+      </section>
+
+      <section class="analytics-panels panel">
+        <div class="panel-head">
+          <h2>Global Attack Map</h2>
+          <p class="muted">Public source IPs mapped by severity · <span id="updated-map">Last updated: —</span></p>
+        </div>
+        <div id="attack-map"></div>
+      </section>
+
+      <section class="analytics-panels grid-two">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Top Attacking IPs</h2>
+            <span id="updated-attackers" class="muted">Last updated: —</span>
+          </div>
           <table>
             <thead>
               <tr>
-                <th>Timestamp</th>
-                <th>Rule ID</th>
-                <th>Description</th>
+                <th>Source IP</th>
+                <th>Count</th>
                 <th>Severity</th>
-                <th>Agent Name</th>
-                <th>Agent IP</th>
               </tr>
             </thead>
-            <tbody id="alerts-body">
+            <tbody id="top-attackers-body"></tbody>
+          </table>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Top Triggered Rules</h2>
+            <span id="updated-rules" class="muted">Last updated: —</span>
+          </div>
+          <table>
+            <thead>
               <tr>
-                <td colspan="6" class="muted">Waiting for syslog alerts...</td>
+                <th>Rule</th>
+                <th>Alerts</th>
+                <th>Severity</th>
               </tr>
-            </tbody>
+            </thead>
+            <tbody id="top-rules-body"></tbody>
           </table>
         </div>
       </section>
+
+      <section class="analytics-panels panel">
+        <div class="panel-head">
+          <h2>Live Attack Timeline</h2>
+          <p class="muted">Streaming newest alerts as they arrive · <span id="updated-live">Last updated: —</span></p>
+        </div>
+        <div id="attack-timeline" class="attack-timeline">
+          <div class="timeline-empty muted">No alerts received yet.</div>
+        </div>
+      </section>
+
+      <section class="alert-stream grid-two">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Risky Hosts</h2>
+            <span id="updated-hosts" class="muted">Last updated: —</span>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Host</th>
+                <th>Count</th>
+                <th>Highest Severity</th>
+                <th>Last Activity</th>
+              </tr>
+            </thead>
+            <tbody id="hosts-body"></tbody>
+          </table>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Latest Alerts Stream</h2>
+            <span id="updated-stream" class="muted">Last updated: —</span>
+          </div>
+          <div id="error-banner" class="error-banner hidden"></div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Rule ID</th>
+                  <th>Description</th>
+                  <th>Severity</th>
+                  <th>Agent</th>
+                  <th>Source IP</th>
+                </tr>
+              </thead>
+              <tbody id="alerts-body">
+                <tr>
+                  <td colspan="6" class="muted">Waiting for syslog alerts...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="analytics-panels grid-two">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Recent SOC Activity</h2>
+            <span id="updated-activity" class="muted">Last updated: —</span>
+          </div>
+          <ul id="soc-activity" class="activity-feed">
+            <li class="muted">No recent activity yet.</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Threat Intelligence Pulse</h2>
+          </div>
+          <div class="pulse-grid">
+            <div class="pulse-card">
+              <span class="pulse-label">External Indicators</span>
+              <span id="pulse-indicators">—</span>
+            </div>
+            <div class="pulse-card">
+              <span class="pulse-label">Malware Hits</span>
+              <span id="pulse-malware">—</span>
+            </div>
+            <div class="pulse-card">
+              <span class="pulse-label">Blocked Attempts</span>
+              <span id="pulse-blocked">—</span>
+            </div>
+          </div>
+        </div>
+      </section>
+      </div>
     </div>
 
-    <script src="/script.js"></script>
+    <div id="lock-overlay" class="lock-overlay hidden">
+      <div class="lock-backdrop"></div>
+      <div class="lock-modal">
+        <div class="lock-header">
+          <h3>SOC Console Locked</h3>
+        </div>
+        <p class="lock-message">Enter password to continue.</p>
+        <input id="lock-password" type="password" placeholder="Password" />
+        <button id="unlock-button" class="ghost">Unlock</button>
+        <p id="lock-error" class="lock-error hidden">Incorrect password.</p>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <script src="/dashboard.js"></script>
   </body>
 </html>

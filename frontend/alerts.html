@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FreshStart SOC | Alerts</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-left">
+        <span class="brand">FreshStart SOC</span>
+        <div class="nav-links">
+          <a href="/index.html">Dashboard</a>
+          <a href="/alerts.html" class="active">Alerts</a>
+          <a href="/investigations.html">Investigations</a>
+          <a href="/assets.html">Assets</a>
+          <a href="/active-response.html">Active Response</a>
+          <a href="/settings.html">Settings</a>
+        </div>
+      </div>
+      <div class="nav-right">
+        <div class="status-chip">
+          <span class="status-dot live"></span>
+          System Status: Live
+        </div>
+        <div class="status-chip">
+          <span class="status-dot warn"></span>
+          Wazuh: Connected
+        </div>
+        <div class="status-chip">Response Mode: Detect Only</div>
+        <span class="pill live-badge">Live</span>
+      </div>
+    </nav>
+
+    <div class="page-shell">
+      <header class="page-header">
+        <div>
+          <p class="eyebrow">Alert Investigation</p>
+          <h1>Alerts</h1>
+          <p class="hero-copy">Filter, sort, and investigate security alerts in real time.</p>
+        </div>
+      </header>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Filters</h2>
+          <span class="muted">Auto-refresh every 5 seconds</span>
+        </div>
+        <div class="filters">
+          <label class="filter-field">
+            <span>Severity</span>
+            <select id="filter-severity">
+              <option value="">All</option>
+              <option value="critical">Critical</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </label>
+          <label class="filter-field">
+            <span>Time Range</span>
+            <select id="filter-timerange">
+              <option value="15m">Last 15 minutes</option>
+              <option value="1h">Last 1 hour</option>
+              <option value="24h">Last 24 hours</option>
+              <option value="7d">Last 7 days</option>
+              <option value="custom">Custom Range</option>
+            </select>
+          </label>
+          <label class="filter-field">
+            <span>Search</span>
+            <input id="filter-search" type="text" placeholder="Search by IP or rule text" />
+          </label>
+          <label class="filter-field">
+            <span>Add to Investigation</span>
+            <select id="investigation-select">
+              <option value="">Select case</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="panel alert-stream">
+        <div class="panel-head">
+          <h2>Alert Stream</h2>
+          <div class="alert-controls">
+            <button class="ghost" data-sort="timestamp">Sort by Time</button>
+            <button class="ghost" data-sort="severity">Sort by Severity</button>
+          </div>
+        </div>
+        <div id="alerts-error" class="error-banner hidden"></div>
+        <div class="table-wrap">
+          <table class="alert-table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Severity</th>
+                <th>Rule Description</th>
+                <th>Source IP</th>
+                <th>Agent / Host</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="alerts-body">
+              <tr>
+                <td colspan="6" class="muted">Loading alerts...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <span id="pagination-info" class="muted">Showing 0–0 of 0 alerts</span>
+          <div id="pagination-controls" class="pagination-controls"></div>
+        </div>
+      </section>
+    </div>
+
+    <div id="alert-drawer" class="drawer hidden">
+      <div class="drawer-backdrop"></div>
+      <div class="drawer-panel">
+        <div class="drawer-header">
+          <h3>Alert Details</h3>
+          <button id="drawer-close" class="ghost">Close</button>
+        </div>
+        <div class="drawer-body">
+          <div id="drawer-summary" class="modal-summary"></div>
+          <label class="filter-field">
+            <span>Status</span>
+            <select id="drawer-status">
+              <option value="New">New</option>
+              <option value="Investigating">Investigating</option>
+              <option value="Resolved">Resolved</option>
+            </select>
+          </label>
+          <div class="drawer-section">
+            <h4>Raw JSON</h4>
+            <pre id="drawer-json" class="modal-json"></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/alerts.js"></script>
+  </body>
+</html>

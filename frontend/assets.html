@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FreshStart SOC | Assets</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-left">
+        <span class="brand">FreshStart SOC</span>
+        <div class="nav-links">
+          <a href="/index.html">Dashboard</a>
+          <a href="/alerts.html">Alerts</a>
+          <a href="/investigations.html">Investigations</a>
+          <a href="/assets.html" class="active">Assets</a>
+          <a href="/active-response.html">Active Response</a>
+          <a href="/settings.html">Settings</a>
+        </div>
+      </div>
+      <div class="nav-right">
+        <div class="status-chip">
+          <span class="status-dot live"></span>
+          System Status: Live
+        </div>
+        <div class="status-chip">
+          <span class="status-dot warn"></span>
+          Wazuh: Connected
+        </div>
+        <div class="status-chip">Response Mode: Detect Only</div>
+        <span class="pill live-badge">Live</span>
+      </div>
+    </nav>
+
+    <div class="page-shell">
+      <header class="page-header">
+        <div>
+          <p class="eyebrow">Asset Inventory</p>
+          <h1>Assets</h1>
+          <p class="hero-copy">Monitor every endpoint reporting to Wazuh in real time.</p>
+        </div>
+      </header>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Monitored Endpoints</h2>
+          <span class="muted">Refreshes every 10 seconds</span>
+        </div>
+        <div id="assets-error" class="error-banner hidden"></div>
+        <div class="table-wrap">
+          <table class="alert-table">
+            <thead>
+              <tr>
+                <th>Asset Name</th>
+                <th>IP Address</th>
+                <th>Alerts</th>
+                <th>Last Seen</th>
+              </tr>
+            </thead>
+            <tbody id="assets-body">
+              <tr>
+                <td colspan="4" class="muted">Loading assets...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <script src="/assets.js"></script>
+  </body>
+</html>

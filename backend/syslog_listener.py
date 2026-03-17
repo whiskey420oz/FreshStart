@@ -2,15 +2,14 @@
 import logging
 import socketserver
 import threading
-from typing import Optional
-
-from alert_store import add_alert
+from typing import Callable, Optional
 
 
 logger = logging.getLogger("freshstart.syslog")
 
 
 def _extract_json(payload: str) -> Optional[dict]:
+    # Wazuh syslog includes JSON; extract the JSON object from the syslog envelope.
     start = payload.find("{")
     end = payload.rfind("}")
     if start == -1 or end == -1 or end <= start:
@@ -23,8 +22,11 @@ def _extract_json(payload: str) -> Optional[dict]:
 
 
 def _normalize_alert(raw: dict) -> dict:
+    # Normalize the syslog JSON into the dashboard schema.
     agent = raw.get("agent", {})
     rule = raw.get("rule", {})
+    data = raw.get("data", {}) if isinstance(raw.get("data"), dict) else {}
+    source_ip = data.get("srcip") or raw.get("srcip")
 
     return {
         "timestamp": raw.get("timestamp") or raw.get("@timestamp") or "Unknown",
@@ -33,6 +35,9 @@ def _normalize_alert(raw: dict) -> dict:
         "rule_level": int(rule.get("level", 0) or 0),
         "agent_name": agent.get("name") or "Unknown agent",
         "agent_ip": agent.get("ip") or "N/A",
+        "source_ip": source_ip,
+        "src_ip": source_ip,
+        "protocol": data.get("proto") or data.get("protocol") or raw.get("protocol") or "N/A",
     }
 
 
@@ -49,15 +54,17 @@ class SyslogUDPHandler(socketserver.BaseRequestHandler):
             return
 
         alert = _normalize_alert(payload)
-        add_alert(alert)
+        if callable(self.server.on_alert):
+            self.server.on_alert(alert)
         logger.info("Alert received: rule=%s agent=%s", alert.get("rule_id"), alert.get("agent_name"))
 
 
 class SyslogListener:
-    def __init__(self, host: str = "0.0.0.0", port: int = 1514):
+    def __init__(self, host: str = "0.0.0.0", port: int = 1514, on_alert: Optional[Callable[[dict], None]] = None):
         self.host = host
         self.port = port
         self._server = socketserver.ThreadingUDPServer((self.host, self.port), SyslogUDPHandler)
+        self._server.on_alert = on_alert
         self._thread: Optional[threading.Thread] = None
 
     def start(self):

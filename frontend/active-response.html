@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FreshStart SOC | Active Response</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-left">
+        <span class="brand">FreshStart SOC</span>
+        <div class="nav-links">
+          <a href="/index.html">Dashboard</a>
+          <a href="/alerts.html">Alerts</a>
+          <a href="/investigations.html">Investigations</a>
+          <a href="/assets.html">Assets</a>
+          <a href="/active-response.html" class="active">Active Response</a>
+          <a href="/settings.html">Settings</a>
+        </div>
+      </div>
+      <div class="nav-right">
+        <div class="status-chip">
+          <span class="status-dot live"></span>
+          System Status: Live
+        </div>
+        <div class="status-chip">
+          <span class="status-dot warn"></span>
+          Wazuh: Connected
+        </div>
+        <div class="status-chip">Response Mode: Detect Only</div>
+        <span class="pill live-badge">Live</span>
+      </div>
+    </nav>
+
+    <div class="page-shell">
+      <header class="page-header">
+        <div>
+          <p class="eyebrow">Active Response</p>
+          <h1>Response Actions</h1>
+          <p class="hero-copy">Trigger automated containment actions through Wazuh.</p>
+        </div>
+      </header>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Block IP Address</h2>
+          <span class="muted">Send an active response to Wazuh</span>
+        </div>
+        <div class="response-form">
+          <label class="filter-field">
+            <span>IP Address</span>
+            <input id="block-ip-input" type="text" placeholder="192.168.1.50" />
+          </label>
+          <button id="block-ip-button" class="ghost">Block IP</button>
+        </div>
+        <div id="response-message" class="response-message muted"></div>
+      </section>
+    </div>
+
+    <script src="/active-response.js"></script>
+  </body>
+</html>
