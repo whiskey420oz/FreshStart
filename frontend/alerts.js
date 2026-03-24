@@ -3,6 +3,7 @@ const ERROR_BANNER = document.getElementById("alerts-error");
 const FILTER_SEVERITY = document.getElementById("filter-severity");
 const FILTER_TIMERANGE = document.getElementById("filter-timerange");
 const FILTER_SEARCH = document.getElementById("filter-search");
+const SIEM_SEARCH = document.getElementById("siem-search");
 const INVESTIGATION_SELECT = document.getElementById("investigation-select");
 const SORT_BUTTONS = document.querySelectorAll("[data-sort]");
 const DRAWER = document.getElementById("alert-drawer");
@@ -22,6 +23,11 @@ let selectedAlertId = null;
 let selectedAlert = null;
 let totalAlerts = 0;
 let offset = 0;
+
+const URL_PARAMS = new URLSearchParams(window.location.search);
+if (SIEM_SEARCH && URL_PARAMS.get("q")) {
+  SIEM_SEARCH.value = URL_PARAMS.get("q");
+}
 
 function severityBucket(level) {
   if (level <= 3) return "low";
@@ -80,7 +86,7 @@ function openDrawer(alert) {
     <div><strong>Rule:</strong> ${alert.rule_description}</div>
     <div><strong>Severity:</strong> ${alert.rule_level}</div>
     <div><strong>Event Time:</strong> ${formatTimestamp(eventTime)}</div>
-    <div><strong>Ingested At:</strong> ${ingestedAt ? formatTimestamp(ingestedAt) : "â€”"}</div>
+    <div><strong>Ingested At:</strong> ${ingestedAt ? formatTimestamp(ingestedAt) : "--"}</div>
     <div><strong>Agent:</strong> ${alert.agent_name} (${alert.agent_ip || "N/A"})</div>
     <div><strong>Source IP:</strong> ${alert.src_ip || "N/A"}</div>
     <div><strong>Destination IP:</strong> ${alert.dest_ip || "N/A"}</div>
@@ -103,13 +109,41 @@ DRAWER.addEventListener("click", (event) => {
   }
 });
 
+function parseQuery(query) {
+  const tokens = query.split(/\s+/).filter(Boolean);
+  const filters = {};
+  const freeText = [];
+  for (const token of tokens) {
+    const [key, ...rest] = token.split(":");
+    if (rest.length) {
+      filters[key.toLowerCase()] = rest.join(":");
+    } else {
+      freeText.push(token);
+    }
+  }
+  if (freeText.length) filters.text = freeText.join(" ");
+  return filters;
+}
+
 function applyFilters(alerts) {
   const severity = FILTER_SEVERITY.value;
-  const search = FILTER_SEARCH.value.trim().toLowerCase();
+  const search = FILTER_SEARCH ? FILTER_SEARCH.value.trim().toLowerCase() : "";
+  const siemQuery = SIEM_SEARCH ? SIEM_SEARCH.value.trim() : "";
+  const queryFilters = siemQuery ? parseQuery(siemQuery) : {};
 
   return alerts.filter((alert) => {
     const normalized = (alert.severity_label || severityBucket(Number(alert.rule_level) || 0)).toLowerCase();
     if (severity && normalized !== severity) return false;
+    if (queryFilters.severity && normalized !== queryFilters.severity) return false;
+    if (queryFilters.ip && String(alert.src_ip || "").indexOf(queryFilters.ip) === -1) return false;
+    if (queryFilters.agent && String(alert.agent_name || "").toLowerCase().indexOf(queryFilters.agent.toLowerCase()) === -1) {
+      return false;
+    }
+    if (queryFilters.rule && String(alert.rule_id || "").indexOf(queryFilters.rule) === -1) return false;
+    if (queryFilters.text) {
+      const haystack = `${alert.rule_description} ${alert.src_ip} ${alert.agent_name}`.toLowerCase();
+      if (!haystack.includes(queryFilters.text.toLowerCase())) return false;
+    }
     if (search) {
       const haystack = `${alert.rule_description} ${alert.src_ip} ${alert.agent_name}`.toLowerCase();
       return haystack.includes(search);
@@ -154,7 +188,7 @@ function renderTable(alerts) {
       return `
         <tr class="alert-row">
           <td>${formatTimestamp(alert.timestamp)}</td>
-          <td><span class="severity ${bucket}">${bucket.toUpperCase()}</span></td>
+          <td><span class="severity-pill ${bucket}">${bucket.toUpperCase()}</span></td>
           <td>${alert.rule_description}</td>
           <td class="mono">${alert.src_ip || "N/A"}</td>
           <td>${alert.agent_name}</td>
@@ -244,7 +278,8 @@ SORT_BUTTONS.forEach((button) => {
   });
 });
 
-[FILTER_SEVERITY, FILTER_SEARCH].forEach((field) => {
+[FILTER_SEVERITY, FILTER_SEARCH, SIEM_SEARCH].forEach((field) => {
+  if (!field) return;
   field.addEventListener("input", updateTable);
 });
 

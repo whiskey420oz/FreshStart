@@ -54,12 +54,30 @@ async function checkAuth() {
     const response = await originalFetch("/auth/me", { headers: buildAuthHeaders() });
     const payload = await response.json();
     if (!payload.auth_required) {
+      document.body.dataset.role = "admin";
       return true;
     }
-    return payload.authenticated === true;
+    if (payload.authenticated === true) {
+      document.body.dataset.role = payload.user?.role || "analyst";
+      return true;
+    }
+    return false;
   } catch (error) {
     return false;
   }
+}
+
+function applyRoleVisibility() {
+  const role = document.body.dataset.role;
+  if (!role) return;
+  document.querySelectorAll("[data-role]").forEach((el) => {
+    const required = el.getAttribute("data-role");
+    if (required === "admin" && role !== "admin") {
+      el.classList.add("role-hidden");
+    } else {
+      el.classList.remove("role-hidden");
+    }
+  });
 }
 
 async function enforceAuth() {
@@ -68,6 +86,7 @@ async function enforceAuth() {
     clearAuthToken();
   }
   const ok = await checkAuth();
+  applyRoleVisibility();
   if (!ok) {
     const next = encodeURIComponent(window.location.pathname + window.location.search + window.location.hash);
     window.location.replace(`/login.html?next=${next}`);

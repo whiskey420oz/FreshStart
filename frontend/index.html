@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FreshStart SOC</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/styles.css" />
     <link
       rel="stylesheet"
@@ -36,12 +37,15 @@
           <div class="sidebar-section">Response</div>
           <a href="/active-response.html" data-tooltip="Active Response"><span class="nav-icon icon-response" aria-hidden="true"></span><span class="label">Active Response</span></a>
           <div class="sidebar-section">Administration</div>
-          <a href="/settings.html" data-tooltip="Settings"><span class="nav-icon icon-settings" aria-hidden="true"></span><span class="label">Settings</span></a>
+          <a href="/settings.html" data-tooltip="Settings" data-role="admin"><span class="nav-icon icon-settings" aria-hidden="true"></span><span class="label">Settings</span></a>
         </nav>
       </aside>
 
       <div id="app-content" class="main">
         <header class="topbar">
+          <form id="global-search-form" class="topbar-search">
+            <input id="global-search-input" type="search" placeholder="Search alerts, IPs, rules, agents..." />
+          </form>
           <div id="status-system" class="status-pill">
             <span class="status-dot"></span>
             <span class="status-text">System: —</span>
@@ -60,11 +64,34 @@
           </div>
           <span id="stream-status" class="pill live-badge">Live</span>
           <span id="user-pill" class="pill">User: —</span>
+          <button id="focus-toggle" class="ghost focus-toggle" type="button">Focus</button>
           <button id="lock-button" class="ghost lock-button" type="button">Lock</button>
           <button id="logout-button" class="ghost" type="button">Logout</button>
         </header>
 
         <div class="page-shell">
+          <section class="command-strip">
+            <div class="kpi-tile">
+              <span class="kpi-label">Events Per Second</span>
+              <span class="kpi-value" id="kpi-eps">—</span>
+              <span class="muted">Live ingest rate</span>
+            </div>
+            <div class="kpi-tile">
+              <span class="kpi-label">Queue Depth</span>
+              <span class="kpi-value" id="kpi-queue">—</span>
+              <span class="muted">Redis alerts_queue</span>
+            </div>
+            <div class="kpi-tile">
+              <span class="kpi-label">Storage Mode</span>
+              <span class="kpi-value" id="kpi-storage">—</span>
+              <span class="muted">Primary analytics source</span>
+            </div>
+            <div class="kpi-tile">
+              <span class="kpi-label">Pipeline Health</span>
+              <span class="kpi-value" id="kpi-health">—</span>
+              <span class="muted">Ingest, worker, API</span>
+            </div>
+          </section>
           <header class="page-header">
             <div>
               <p class="eyebrow">Security Operations Center</p>

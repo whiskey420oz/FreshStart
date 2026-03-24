@@ -1,5 +1,5 @@
 {
-  "syslog_listener": 8700,
-  "alert_worker": 25660,
-  "flask_app": 24520
+  "syslog_listener": 29480,
+  "alert_worker": 26384,
+  "flask_app": 12284
 }

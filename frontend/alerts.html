@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FreshStart SOC | Alerts</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
@@ -30,12 +31,15 @@
           <div class="sidebar-section">Response</div>
           <a href="/active-response.html" data-tooltip="Active Response"><span class="nav-icon icon-response" aria-hidden="true"></span><span class="label">Active Response</span></a>
           <div class="sidebar-section">Administration</div>
-          <a href="/settings.html" data-tooltip="Settings"><span class="nav-icon icon-settings" aria-hidden="true"></span><span class="label">Settings</span></a>
+          <a href="/settings.html" data-tooltip="Settings" data-role="admin"><span class="nav-icon icon-settings" aria-hidden="true"></span><span class="label">Settings</span></a>
         </nav>
       </aside>
 
       <div id="app-content" class="main">
         <header class="topbar">
+          <form id="global-search-form" class="topbar-search">
+            <input id="global-search-input" type="search" placeholder="Search alerts, IPs, rules, agents..." />
+          </form>
           <div id="status-system" class="status-pill">
             <span class="status-dot"></span>
             <span class="status-text">System: —</span>
@@ -52,6 +56,9 @@
             <span class="status-dot"></span>
             <span class="status-text">Worker: —</span>
           </div>
+          <span id="user-pill" class="pill">User: —</span>
+          <button id="focus-toggle" class="ghost focus-toggle" type="button">Focus</button>
+          <button id="logout-button" class="ghost" type="button">Logout</button>
         </header>
 
         <div class="page-shell">
@@ -65,40 +72,28 @@
 
       <section class="panel">
         <div class="panel-head">
-          <h2>Filters</h2>
-          <span class="muted">Auto-refresh every 5 seconds</span>
+          <h2>SIEM Search</h2>
+          <span class="muted">Query alerts with filters · Auto-refresh every 5 seconds</span>
         </div>
-        <div class="filters">
-          <label class="filter-field">
-            <span>Severity</span>
-            <select id="filter-severity">
-              <option value="">All</option>
-              <option value="critical">Critical</option>
-              <option value="high">High</option>
-              <option value="medium">Medium</option>
-              <option value="low">Low</option>
-            </select>
-          </label>
-          <label class="filter-field">
-            <span>Time Range</span>
-            <select id="filter-timerange">
-              <option value="15m">Last 15 minutes</option>
-              <option value="1h">Last 1 hour</option>
-              <option value="24h">Last 24 hours</option>
-              <option value="7d" selected>Last 7 days</option>
-              <option value="custom">Custom Range</option>
-            </select>
-          </label>
-          <label class="filter-field">
-            <span>Search</span>
-            <input id="filter-search" type="text" placeholder="Search by IP or rule text" />
-          </label>
-          <label class="filter-field">
-            <span>Add to Investigation</span>
-            <select id="investigation-select">
-              <option value="">Select case</option>
-            </select>
-          </label>
+        <div class="search-bar siem-bar">
+          <input id="siem-search" class="search-input" type="search" placeholder="ip:1.2.3.4 agent:LAB rule:60106 text:failed login" />
+          <select id="filter-severity">
+            <option value="">All</option>
+            <option value="critical">Critical</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+          <select id="filter-timerange">
+            <option value="15m">Last 15 minutes</option>
+            <option value="1h">Last 1 hour</option>
+            <option value="24h">Last 24 hours</option>
+            <option value="7d" selected>Last 7 days</option>
+            <option value="custom">Custom Range</option>
+          </select>
+          <select id="investigation-select">
+            <option value="">Add to Investigation</option>
+          </select>
         </div>
       </section>
 

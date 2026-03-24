@@ -5,6 +5,9 @@ let STATUS_REDIS;
 let STATUS_WORKER;
 let USER_PILL;
 let LOGOUT_BUTTON;
+let FOCUS_TOGGLE;
+let GLOBAL_SEARCH_FORM;
+let GLOBAL_SEARCH_INPUT;
 
 function setStatusPill(element, state, label) {
   if (!element) return;
@@ -54,10 +57,10 @@ async function loadUser() {
     if (payload.authenticated) {
       USER_PILL.textContent = `User: ${payload.user?.username || "analyst"}`;
     } else {
-      USER_PILL.textContent = "User: —";
+      USER_PILL.textContent = "User: --";
     }
   } catch (error) {
-    USER_PILL.textContent = "User: —";
+    USER_PILL.textContent = "User: --";
   }
 }
 
@@ -80,6 +83,9 @@ function initStatusUi() {
   STATUS_WORKER = document.getElementById("status-worker");
   USER_PILL = document.getElementById("user-pill");
   LOGOUT_BUTTON = document.getElementById("logout-button");
+  FOCUS_TOGGLE = document.getElementById("focus-toggle");
+  GLOBAL_SEARCH_FORM = document.getElementById("global-search-form");
+  GLOBAL_SEARCH_INPUT = document.getElementById("global-search-input");
 
   if (TOGGLE_BUTTON) {
     TOGGLE_BUTTON.addEventListener("click", () => {
@@ -95,6 +101,26 @@ function initStatusUi() {
 
   if (LOGOUT_BUTTON) {
     LOGOUT_BUTTON.addEventListener("click", logout);
+  }
+
+  if (FOCUS_TOGGLE) {
+    if (localStorage.getItem("focusMode") === "true") {
+      document.body.classList.add("focus-mode");
+    }
+    FOCUS_TOGGLE.addEventListener("click", () => {
+      document.body.classList.toggle("focus-mode");
+      localStorage.setItem("focusMode", document.body.classList.contains("focus-mode") ? "true" : "false");
+    });
+  }
+
+  if (GLOBAL_SEARCH_FORM && GLOBAL_SEARCH_INPUT) {
+    GLOBAL_SEARCH_FORM.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const query = GLOBAL_SEARCH_INPUT.value.trim();
+      if (!query) return;
+      const next = `/alerts.html?q=${encodeURIComponent(query)}`;
+      window.location.href = next;
+    });
   }
 
   loadStatus();

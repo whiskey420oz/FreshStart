@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FreshStart SOC | Vulnerabilities</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
@@ -30,12 +31,15 @@
           <div class="sidebar-section">Response</div>
           <a href="/active-response.html" data-tooltip="Active Response"><span class="nav-icon icon-response" aria-hidden="true"></span><span class="label">Active Response</span></a>
           <div class="sidebar-section">Administration</div>
-          <a href="/settings.html" data-tooltip="Settings"><span class="nav-icon icon-settings" aria-hidden="true"></span><span class="label">Settings</span></a>
+          <a href="/settings.html" data-tooltip="Settings" data-role="admin"><span class="nav-icon icon-settings" aria-hidden="true"></span><span class="label">Settings</span></a>
         </nav>
       </aside>
 
       <div id="app-content" class="main">
         <header class="topbar">
+          <form id="global-search-form" class="topbar-search">
+            <input id="global-search-input" type="search" placeholder="Search alerts, IPs, rules, agents..." />
+          </form>
           <div id="status-system" class="status-pill">
             <span class="status-dot"></span>
             <span class="status-text">System: —</span>
@@ -52,6 +56,9 @@
             <span class="status-dot"></span>
             <span class="status-text">Worker: —</span>
           </div>
+          <span id="user-pill" class="pill">User: —</span>
+          <button id="focus-toggle" class="ghost focus-toggle" type="button">Focus</button>
+          <button id="logout-button" class="ghost" type="button">Logout</button>
         </header>
 
         <div class="page-shell">

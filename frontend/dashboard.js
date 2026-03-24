@@ -31,6 +31,10 @@ const METRIC_MTTR = document.getElementById("metric-mttr");
 const METRIC_ANALYSTS = document.getElementById("metric-analysts");
 const METRIC_INCIDENTS_OPEN = document.getElementById("metric-incidents-open");
 const METRIC_INCIDENTS_CONTAINED = document.getElementById("metric-incidents-contained");
+const KPI_EPS = document.getElementById("kpi-eps");
+const KPI_QUEUE = document.getElementById("kpi-queue");
+const KPI_STORAGE = document.getElementById("kpi-storage");
+const KPI_HEALTH = document.getElementById("kpi-health");
 const TOP_RULES_BODY = document.getElementById("top-rules-body");
 const TOP_ATTACKERS_BODY = document.getElementById("top-attackers-body");
 const ATTACKERS_BODY = document.getElementById("attackers-body");
@@ -78,6 +82,7 @@ let isLocked = false;
 const SOC_PASSWORD = "freshstart";
 const MAX_RECENT_ALERTS = 200;
 let recentAlerts = [];
+let lastMetricsSample = null;
 
 const lastUpdated = {
   severity: null,
@@ -236,6 +241,17 @@ function updateMetrics(metrics) {
   PULSE_INDICATORS.textContent = metrics.suspicious_ips ?? "—";
   PULSE_MALWARE.textContent = metrics.critical_alerts ?? "—";
   PULSE_BLOCKED.textContent = metrics.high_alerts ?? "—";
+
+  if (KPI_EPS) {
+    const now = Date.now();
+    if (lastMetricsSample) {
+      const deltaAlerts = (metrics.events_processed ?? 0) - lastMetricsSample.total;
+      const deltaSeconds = Math.max(1, (now - lastMetricsSample.ts) / 1000);
+      const eps = Math.max(0, deltaAlerts / deltaSeconds);
+      KPI_EPS.textContent = eps.toFixed(1);
+    }
+    lastMetricsSample = { total: metrics.events_processed ?? 0, ts: now };
+  }
 }
 
 function setWazuhUnavailable(message) {
@@ -348,7 +364,7 @@ function renderWazuhAlerts(alerts) {
           <td>${formatTimestamp(alert.timestamp)}</td>
           <td>${alert.agent_name || "—"}</td>
           <td>${alert.rule_description || alert.rule_id || "—"}</td>
-          <td><span class="severity ${bucket}">${bucket.toUpperCase()}</span></td>
+          <td><span class="severity-pill ${bucket}">${bucket.toUpperCase()}</span></td>
           <td class="${!isPrivateIp(alert.source_ip) ? "ip-attacker" : ""}">${alert.source_ip || "—"}</td>
         </tr>
       `;
@@ -373,7 +389,7 @@ function renderVulnerabilities(entries) {
           <td>${item.agent_name || "—"}</td>
           <td>${item.package_name || "—"}</td>
           <td>${item.cve || "—"}</td>
-          <td>${item.severity || "—"}</td>
+          <td><span class="badge">${item.severity || "—"}</span></td>
         </tr>
       `
     )
@@ -396,7 +412,7 @@ function renderFileIntegrity(entries) {
         <tr>
           <td>${item.agent || "—"}</td>
           <td class="mono">${item.file_path || "—"}</td>
-          <td>${item.event_type || "—"}</td>
+          <td><span class="badge">${item.event_type || "—"}</span></td>
           <td>${formatTimestamp(item.timestamp)}</td>
         </tr>
       `
@@ -473,7 +489,7 @@ function updateTopRules(rules) {
         <tr>
           <td>${description}</td>
           <td>${rule.count}</td>
-          <td><span class="severity ${severity}">${severity.toUpperCase()}</span></td>
+          <td><span class="severity-pill ${severity}">${severity.toUpperCase()}</span></td>
         </tr>
       `;
     })
@@ -495,7 +511,7 @@ function updateTopAttackers(attackers) {
         <tr>
           <td>${attacker.src_ip}</td>
           <td>${attacker.count}</td>
-          <td><span class="severity ${severity}">${severity.toUpperCase()}</span></td>
+          <td><span class="severity-pill ${severity}">${severity.toUpperCase()}</span></td>
         </tr>
       `;
     })
@@ -863,7 +879,7 @@ function renderRow(alert, prepend = false) {
     <td>${formatTimestamp(alert.timestamp)}</td>
     <td>${alert.rule_id}</td>
     <td>${alert.rule_description}</td>
-    <td><span class="severity ${bucket}">${level}</span></td>
+    <td><span class="severity-pill ${bucket}">${bucket.toUpperCase()}</span></td>
     <td>${alert.agent_name}</td>
     <td class="${ipClass}">${alert.src_ip || "N/A"}</td>
     <td>${mitre}</td>
@@ -1004,6 +1020,8 @@ async function loadAnalytics() {
       incidentTimelineChart.update();
     }
 
+    loadSystemKpis();
+
     markUpdated("severity");
     markUpdated("timeline");
     markUpdated("attackers");
@@ -1016,6 +1034,24 @@ async function loadAnalytics() {
     markUpdated("incidentTimeline");
   } catch (error) {
     showError(error.message || "Unable to load analytics.");
+  }
+}
+
+async function loadSystemKpis() {
+  try {
+    const res = await fetch("/system/debug");
+    const debug = await res.json();
+    if (KPI_QUEUE) KPI_QUEUE.textContent = debug.queue_length ?? "—";
+    if (KPI_STORAGE) {
+      const storage = debug.opensearch === "enabled" ? "OPENSEARCH" : "SQLITE";
+      KPI_STORAGE.textContent = storage;
+    }
+    if (KPI_HEALTH) {
+      const ok = debug.database === "ok" && debug.redis === "connected";
+      KPI_HEALTH.textContent = ok ? "OK" : "DEGRADED";
+    }
+  } catch (error) {
+    if (KPI_QUEUE) KPI_QUEUE.textContent = "—";
   }
 }
 

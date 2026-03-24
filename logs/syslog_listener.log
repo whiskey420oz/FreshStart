@@ -8415,3 +8415,6 @@ Traceback (most recent call last):
 OSError: [WinError 10048] Only one usage of each socket address (protocol/network address/port) is normally permitted
 2026-03-24 13:18:25,675 INFO Syslog listener running on UDP/TCP port 1514
 2026-03-24 13:20:56,804 INFO Syslog listener running on UDP/TCP port 1514
+2026-03-24 13:32:12,554 INFO Syslog listener running on UDP/TCP port 1514
+2026-03-24 14:21:25,995 INFO Syslog listener running on UDP/TCP port 1514
+2026-03-24 14:22:16,626 INFO Syslog listener running on UDP/TCP port 1514

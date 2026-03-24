@@ -1,0 +1,170 @@
+{
+  "version": 1,
+  "skills": {
+    "cloudflare-deploy": {
+      "source": "skills.volces.com",
+      "sourceType": "well-known",
+      "computedHash": "0815cfc4be577a29084337b218a91fdfaa1644a9cc1498f1d1a15fc32aafd383"
+    },
+    "design-system-patterns": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "computedHash": "f1554c36a832c3586b69294c8a32e7c371edd4a42bbef9aa5ca4394769d3511d"
+    },
+    "doc": {
+      "source": "skills.volces.com",
+      "sourceType": "well-known",
+      "computedHash": "41449d6dab7fea8bfcd92130550c21ef12ff4ab9640838e5077390a44b142ffa"
+    },
+    "documentation-templates": {
+      "source": "sickn33/antigravity-awesome-skills",
+      "sourceType": "github",
+      "computedHash": "f02ca2d0028a800eb5e58d5e291b55e1ea419fb9a7fa2f118d490ae4e6535430"
+    },
+    "figma": {
+      "source": "skills.volces.com",
+      "sourceType": "well-known",
+      "computedHash": "6eb607f7fe2c6ead6630661e9067950d7372772b2c933823e4888ebbb5b874d4"
+    },
+    "figma-implement-design": {
+      "source": "skills.volces.com",
+      "sourceType": "well-known",
+      "computedHash": "0f8b5c14fe996277b5029ae48e6d0a1f610189c716572c2979b7ebeb4dc95421"
+    },
+    "gh-address-comments": {
+      "source": "skills.volces.com",
+      "sourceType": "well-known",
+      "computedHash": "39acf09da5896afde2b61b22f4354a72dbed6633da9e8a578eacec4899b0ecfb"
+    },
+    "gh-fix-ci": {
+      "source": "skills.volces.com",
+      "sourceType": "well-known",
+      "computedHash": "f7f7c1d03c76630180b0adf02f21802a8a19dc005cde9fb51cb273dcd77861b9"
+    },
+    "imagegen": {
+      "source": "skills.volces.com",
+      "sourceType": "well-known",
+      "computedHash": "9809f7988cedb5cb383e61f619cd48cc25a9389c1c60d8ae2888dfce67d6382e"
+    },
+    "interface-design": {
+      "source": "dammyjay93/interface-design",
+      "sourceType": "github",
+      "computedHash": "4d5fe1dacfebc0c1b3837b061405150ed2e4971c096543afc46c23161c5a4f7a"
+    },
+    "jupyter-notebook": {
+      "source": "skills.volces.com",
+      "sourceType": "well-known",
+      "computedHash": "e4a6f407945182ffcb327d83d8eae7644f0b1f44899bb1f8ffc18ec2c4f10b1c"
+    },
+    "markdown-documentation": {
+      "source": "aj-geddes/useful-ai-prompts",
+      "sourceType": "github",
+      "computedHash": "eefb1e461b3791b45a0dc9a56fb2e04c6bdf4a2f76413d65c851b8bd94f0dcc4"
+    },
+    "netlify-deploy": {
+      "source": "skills.volces.com",
+      "sourceType": "well-known",
+      "computedHash": "471f259c99edf5a6778b9d9fa069ca5f70c5807fd61b8cbf088806c599dc205d"
+    },
+    "openai-docs": {
+      "source": "skills.volces.com",
+      "sourceType": "well-known",
+      "computedHash": "00360f72c8678daa4e7330d5069ffecae20d847c1fc44b0df1adb19829808c33"
+    },
+    "pdf": {
+      "source": "skills.volces.com",
+      "sourceType": "well-known",
+      "computedHash": "5813f32b5ae66802b7c36f2e0c5dd2eaecae19e0cdf54a3bebad16cbe0b419e4"
+    },
+    "playwright": {
+      "source": "skills.volces.com",
+      "sourceType": "well-known",
+      "computedHash": "578249eb3b9c5f8912e8d0b5fefbcf5d4e1dabb45a3eff877e1db7df2414d163"
+    },
+    "render-deploy": {
+      "source": "skills.volces.com",
+      "sourceType": "well-known",
+      "computedHash": "5e19a8cba9c9ee7ad626e22926dde6be0dfa38e08d4af01fdd6655bf92eecb58"
+    },
+    "scanning-tools": {
+      "source": "sickn33/antigravity-awesome-skills",
+      "sourceType": "github",
+      "computedHash": "608cbc2cbdd6562e95b3604a99ed2ef0b93cdea47e8138aaf99288d2e8cc542b"
+    },
+    "screenshot": {
+      "source": "skills.volces.com",
+      "sourceType": "well-known",
+      "computedHash": "299871be9b3958857a15f40aeb7a9480c0f60b369084c3d81756881b7ed1cdb0"
+    },
+    "security-architecture-overview": {
+      "source": "harperaa/secure-claude-skills",
+      "sourceType": "github",
+      "computedHash": "342d5e1710fc734a09e3739b5226a9c8f55c53003a81f589ddc326ae651a60ea"
+    },
+    "security-best-practices": {
+      "source": "skills.volces.com",
+      "sourceType": "well-known",
+      "computedHash": "c27616fb4e27999605b90b261dc729784420c8d77bd1a98748384ffaa5b35704"
+    },
+    "security-ownership-map": {
+      "source": "skills.volces.com",
+      "sourceType": "well-known",
+      "computedHash": "0eefbaabdbe0ccfc39555195b9a7f7c8369abe1b4dc969aabb2e5aec8c3705ab"
+    },
+    "security-threat-model": {
+      "source": "skills.volces.com",
+      "sourceType": "well-known",
+      "computedHash": "d8e905c8697663ef66e418449eadb4c82507631e4050ea9870b41cb1781e54f0"
+    },
+    "sentry": {
+      "source": "skills.volces.com",
+      "sourceType": "well-known",
+      "computedHash": "14f337959e0d2105b299c8c53f12693b1f736abbbdecbe52ff7cd1a208fc9a5f"
+    },
+    "skill-creator": {
+      "source": "skills.volces.com",
+      "sourceType": "well-known",
+      "computedHash": "e4e14121eb4f0407f59d19e12ce64f814f485d2d105f7eac21d46413034ac7ed"
+    },
+    "skill-installer": {
+      "source": "skills.volces.com",
+      "sourceType": "well-known",
+      "computedHash": "03a215e56e9e419a1a6956f96e25052a627e7fdce680faea027360904d73d783"
+    },
+    "sora": {
+      "source": "skills.volces.com",
+      "sourceType": "well-known",
+      "computedHash": "946c333534c30e7289c365e0ed8edb72c6aa0ae3d5e36ce10636533ebfaafd78"
+    },
+    "speech": {
+      "source": "skills.volces.com",
+      "sourceType": "well-known",
+      "computedHash": "156e4f5eb3a78cf074763464b7819479239f3f4de7ed1e526225ecbd44c0d31c"
+    },
+    "spreadsheet": {
+      "source": "skills.volces.com",
+      "sourceType": "well-known",
+      "computedHash": "35de9030dddfd9626f2a531101bef240510b75808fd335840dc62a217b9ee9c5"
+    },
+    "tailwind-design-system": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "computedHash": "0fc7b79d08ee5168d46c6887014cbe5bd02f2c5e458858470e20fc8ecedefb46"
+    },
+    "transcribe": {
+      "source": "skills.volces.com",
+      "sourceType": "well-known",
+      "computedHash": "d97ab9d12404eec45cd60f7a402c1d64fc9f15886fe202fd1d750806e5a37f91"
+    },
+    "vercel-deploy": {
+      "source": "skills.volces.com",
+      "sourceType": "well-known",
+      "computedHash": "7a9aa11e4b3245437948f192f39feb53634064fa3c3c04a000187ca4b9dce3c9"
+    },
+    "webapp-testing": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "computedHash": "5a6a18c0137cfbabec058e86fc1c8f6919d846a7b2a34ee978cc8ced866ee2e5"
+    }
+  }
+}
