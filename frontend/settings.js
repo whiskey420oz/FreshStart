@@ -2,7 +2,10 @@ const SETTINGS_ERROR = document.getElementById("settings-error");
 const SETTINGS_MESSAGE = document.getElementById("settings-message");
 const SAVE_BUTTON = document.getElementById("save-settings");
 const FIELD_WAZUH_IP = document.getElementById("setting-wazuh-ip");
+const FIELD_WAZUH_URL = document.getElementById("setting-wazuh-url");
 const FIELD_SYSLOG_PORT = document.getElementById("setting-syslog-port");
+const FIELD_REDIS_HOST = document.getElementById("setting-redis-host");
+const FIELD_REDIS_PORT = document.getElementById("setting-redis-port");
 const FIELD_DATABASE = document.getElementById("setting-database");
 const FIELD_RESPONSE_MODE = document.getElementById("setting-response-mode");
 
@@ -24,7 +27,10 @@ function setMessage(message, isError = false) {
 
 function populateFields(settings) {
   FIELD_WAZUH_IP.value = settings.wazuh_manager_ip || "";
+  FIELD_WAZUH_URL.value = settings.wazuh_api_url || "";
   FIELD_SYSLOG_PORT.value = settings.syslog_port ?? "";
+  FIELD_REDIS_HOST.value = settings.redis_host || "";
+  FIELD_REDIS_PORT.value = settings.redis_port ?? "";
   FIELD_DATABASE.value = settings.database_type || "";
   FIELD_RESPONSE_MODE.value = settings.response_mode || "";
 }
@@ -44,7 +50,10 @@ async function loadSettings() {
 async function saveSettings() {
   const payload = {
     wazuh_manager_ip: FIELD_WAZUH_IP.value.trim(),
+    wazuh_api_url: FIELD_WAZUH_URL.value.trim(),
     syslog_port: Number(FIELD_SYSLOG_PORT.value || 0),
+    redis_host: FIELD_REDIS_HOST.value.trim(),
+    redis_port: Number(FIELD_REDIS_PORT.value || 0),
     database_type: FIELD_DATABASE.value.trim(),
     response_mode: FIELD_RESPONSE_MODE.value.trim(),
   };

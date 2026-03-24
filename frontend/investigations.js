@@ -18,35 +18,23 @@ const ADD_NOTE = document.getElementById("add-note");
 const CASE_NOTES = document.getElementById("case-notes");
 
 let activeCaseId = null;
-
-function loadCases() {
-  const index = JSON.parse(localStorage.getItem("cases_index") || "[]");
-  return index.map((id) => JSON.parse(localStorage.getItem(`case_${id}`) || "{}")).filter(Boolean);
-}
-
-function saveCase(caseData) {
-  localStorage.setItem(`case_${caseData.id}`, JSON.stringify(caseData));
-  const index = new Set(JSON.parse(localStorage.getItem("cases_index") || "[]"));
-  index.add(caseData.id);
-  localStorage.setItem("cases_index", JSON.stringify([...index]));
-}
+let investigations = [];
 
 function renderCaseList() {
-  const cases = loadCases();
-  if (!cases.length) {
+  if (!investigations.length) {
     CASE_LIST.innerHTML = `<tr><td colspan="5" class="muted">No investigations created yet.</td></tr>`;
     return;
   }
 
-  CASE_LIST.innerHTML = cases
+  CASE_LIST.innerHTML = investigations
     .map(
       (item) => `
         <tr class="alert-row" data-id="${item.id}">
           <td>${item.id}</td>
           <td>${item.title}</td>
           <td>${item.status}</td>
-          <td>${(item.alerts || []).length}</td>
-          <td>${item.created}</td>
+          <td>${item.alert_id ? 1 : 0}</td>
+          <td>${item.created_at || "—"}</td>
         </tr>
       `
     )
@@ -71,48 +59,58 @@ function createCase() {
   const title = CASE_TITLE_INPUT.value.trim();
   if (!title) return;
   const desc = CASE_DESC_INPUT.value.trim();
-  const id = Date.now().toString();
-  const caseData = {
-    id,
-    title,
-    description: desc,
-    status: "Open",
-    created: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    alerts: [],
-    notes: [],
-  };
-  saveCase(caseData);
-  closeNewCaseModal();
-  renderCaseList();
+  fetch("/investigations", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ analyst_name: "SOC Analyst", notes: desc, title }),
+  })
+    .then(() => {
+      closeNewCaseModal();
+      loadInvestigations();
+    })
+    .catch(() => {
+      closeNewCaseModal();
+    });
 }
 
 function openCase(caseId) {
-  const caseData = JSON.parse(localStorage.getItem(`case_${caseId}`) || "{}");
-  if (!caseData.id) return;
-  activeCaseId = caseId;
-  CASE_TITLE.textContent = caseData.title;
-  CASE_META.innerHTML = `
-    <div><strong>Status:</strong> ${caseData.status}</div>
-    <div><strong>Created:</strong> ${caseData.created}</div>
-    <div><strong>Description:</strong> ${caseData.description || "N/A"}</div>
-  `;
-  CASE_STATUS.value = caseData.status;
+  fetch(`/investigations/${caseId}`)
+    .then((response) => response.json())
+    .then((caseData) => {
+      if (!caseData.id) return;
+      activeCaseId = caseId;
+      CASE_TITLE.textContent = caseData.title ? `Case ${caseData.id} · ${caseData.title}` : `Case ${caseData.id}`;
+      CASE_META.innerHTML = `
+        <div><strong>Status:</strong> ${caseData.status}</div>
+        <div><strong>Created:</strong> ${caseData.created_at || "N/A"}</div>
+        <div><strong>Analyst:</strong> ${caseData.analyst_name || "N/A"}</div>
+        <div><strong>Notes:</strong> ${caseData.notes || "N/A"}</div>
+        <div><strong>Incident:</strong> ${
+          caseData.incident_id ? `Incident #${caseData.incident_id}` : "—"
+        }</div>
+      `;
+      CASE_STATUS.value = caseData.status;
 
-  const alerts = (caseData.alerts || []).map((id) => JSON.parse(localStorage.getItem(`alertSnapshot_${id}`) || "{}")).filter(Boolean);
-  CASE_ALERTS.innerHTML = alerts.length
-    ? alerts.map((alert) => `<div>${alert.timestamp} ${alert.rule_description}</div>`).join("")
-    : `<div class="muted">No alerts linked.</div>`;
+      if (caseData.alert_id) {
+        fetch(`/alerts/${caseData.alert_id}`)
+          .then((res) => res.json())
+          .then((alert) => {
+            CASE_ALERTS.innerHTML = alert?.id
+              ? `<div>${alert.timestamp} ${alert.rule_description}</div>`
+              : `<div class="muted">No alerts linked.</div>`;
+          });
+      } else {
+        CASE_ALERTS.innerHTML = `<div class="muted">No alerts linked.</div>`;
+      }
 
-  CASE_TIMELINE.innerHTML = alerts
-    .slice()
-    .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
-    .map((alert) => `<div>${alert.timestamp} ${alert.rule_description}</div>`)
-    .join("");
+      const events = caseData.events || [];
+      CASE_TIMELINE.innerHTML = events.length
+        ? events.map((event) => `<div>${event.created_at} ${event.message}</div>`).join("")
+        : `<div class="muted">No timeline events yet.</div>`;
 
-  CASE_NOTES.innerHTML = caseData.notes.length
-    ? caseData.notes.map((note) => `<div>${note.timestamp} ${note.text}</div>`).join("")
-    : `<div class="muted">No notes yet.</div>`;
-  CASE_DRAWER.classList.remove("hidden");
+      CASE_NOTES.innerHTML = caseData.notes ? `<div>${caseData.notes}</div>` : `<div class="muted">No notes yet.</div>`;
+      CASE_DRAWER.classList.remove("hidden");
+    });
 }
 
 function closeCase() {
@@ -122,32 +120,27 @@ function closeCase() {
 
 function updateCaseStatus() {
   if (!activeCaseId) return;
-  const caseData = JSON.parse(localStorage.getItem(`case_${activeCaseId}`) || "{}");
-  caseData.status = CASE_STATUS.value;
-  saveCase(caseData);
-
-  if (caseData.status === "Resolved") {
-    (caseData.alerts || []).forEach((alertId) => {
-      localStorage.setItem(`alertStatus_${alertId}`, "Resolved");
-    });
-  }
-
-  renderCaseList();
-  openCase(activeCaseId);
+  fetch(`/investigations/${activeCaseId}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status: CASE_STATUS.value }),
+  })
+    .then(() => loadInvestigations())
+    .then(() => openCase(activeCaseId));
 }
 
 function addNote() {
   if (!activeCaseId) return;
   const text = CASE_NOTE_INPUT.value.trim();
   if (!text) return;
-  const caseData = JSON.parse(localStorage.getItem(`case_${activeCaseId}`) || "{}");
-  caseData.notes.push({
-    timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    text,
+  fetch(`/investigations/${activeCaseId}/notes`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ note: text }),
+  }).then(() => {
+    CASE_NOTE_INPUT.value = "";
+    openCase(activeCaseId);
   });
-  saveCase(caseData);
-  CASE_NOTE_INPUT.value = "";
-  openCase(activeCaseId);
 }
 
 NEW_CASE_BUTTON.addEventListener("click", openNewCaseModal);
@@ -167,4 +160,21 @@ CASE_DRAWER.addEventListener("click", (event) => {
 CASE_STATUS.addEventListener("change", updateCaseStatus);
 ADD_NOTE.addEventListener("click", addNote);
 
-renderCaseList();
+function loadInvestigations() {
+  fetch("/investigations")
+    .then((response) => response.json())
+    .then((data) => {
+      investigations = data.investigations || [];
+      renderCaseList();
+    });
+}
+
+loadInvestigations();
+
+const hash = window.location.hash;
+if (hash.startsWith("#case-")) {
+  const caseId = hash.replace("#case-", "");
+  if (caseId) {
+    openCase(caseId);
+  }
+}

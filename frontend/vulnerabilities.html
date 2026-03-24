@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FreshStart SOC | Vulnerabilities</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <span class="brand">FreshStart SOC</span>
+          <button id="toggle-sidebar" class="ghost icon-button" type="button">|||</button>
+        </div>
+        <nav class="sidebar-nav">
+          <div class="sidebar-section">SOC Monitoring</div>
+          <a href="/index.html" data-tooltip="Dashboard"><span class="nav-icon icon-dashboard" aria-hidden="true"></span><span class="label">Dashboard</span></a>
+          <a href="/alerts.html" data-tooltip="Alerts"><span class="nav-icon icon-alerts" aria-hidden="true"></span><span class="label">Alerts</span></a>
+          <a href="/investigations.html" data-tooltip="Investigations"><span class="nav-icon icon-investigations" aria-hidden="true"></span><span class="label">Investigations</span></a>
+          <a href="/incidents.html" data-tooltip="Incidents"><span class="nav-icon icon-incidents" aria-hidden="true"></span><span class="label">Incidents</span></a>
+          <div class="sidebar-section">Infrastructure</div>
+          <a href="/agents.html#/agents" data-tooltip="Agents"><span class="nav-icon icon-agents" aria-hidden="true"></span><span class="label">Agents</span></a>
+          <a href="/assets.html" data-tooltip="Assets"><span class="nav-icon icon-assets" aria-hidden="true"></span><span class="label">Assets</span></a>
+          <a href="/file-integrity.html" data-tooltip="File Integrity"><span class="nav-icon icon-integrity" aria-hidden="true"></span><span class="label">File Integrity</span></a>
+          <div class="sidebar-section">Threat Intel</div>
+          <a href="/vulnerabilities.html" class="active" data-tooltip="Vulnerabilities"><span class="nav-icon icon-vuln" aria-hidden="true"></span><span class="label">Vulnerabilities</span></a>
+          <a href="/threat-intel.html" data-tooltip="Threat Intel"><span class="nav-icon icon-intel" aria-hidden="true"></span><span class="label">Threat Intel</span></a>
+          <a href="/index.html#attack-map" data-tooltip="Attack Map"><span class="nav-icon icon-map" aria-hidden="true"></span><span class="label">Attack Map</span></a>
+          <div class="sidebar-section">Response</div>
+          <a href="/active-response.html" data-tooltip="Active Response"><span class="nav-icon icon-response" aria-hidden="true"></span><span class="label">Active Response</span></a>
+          <div class="sidebar-section">Administration</div>
+          <a href="/settings.html" data-tooltip="Settings"><span class="nav-icon icon-settings" aria-hidden="true"></span><span class="label">Settings</span></a>
+        </nav>
+      </aside>
+
+      <div id="app-content" class="main">
+        <header class="topbar">
+          <div id="status-system" class="status-pill">
+            <span class="status-dot"></span>
+            <span class="status-text">System: —</span>
+          </div>
+          <div id="status-wazuh" class="status-pill">
+            <span class="status-dot"></span>
+            <span class="status-text">Wazuh API: —</span>
+          </div>
+          <div id="status-redis" class="status-pill">
+            <span class="status-dot"></span>
+            <span class="status-text">Redis: —</span>
+          </div>
+          <div id="status-worker" class="status-pill">
+            <span class="status-dot"></span>
+            <span class="status-text">Worker: —</span>
+          </div>
+        </header>
+
+        <div class="page-shell">
+          <header class="page-header">
+            <div>
+              <p class="eyebrow">Exposure Management</p>
+              <h1>Vulnerabilities</h1>
+              <p class="hero-copy">Most recent Wazuh vulnerability detections.</p>
+            </div>
+          </header>
+
+          <section class="panel">
+            <div class="panel-head">
+              <h2>Vulnerability Exposure</h2>
+              <span id="vuln-updated" class="muted">Last updated: —</span>
+            </div>
+            <div id="vuln-error" class="error-banner hidden"></div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Agent</th>
+                    <th>Package</th>
+                    <th>CVE</th>
+                    <th>Severity</th>
+                    <th>CVSS</th>
+                  </tr>
+                </thead>
+                <tbody id="vuln-body">
+                  <tr>
+                    <td colspan="5" class="muted">Loading vulnerabilities...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <script src="/auth.js"></script>
+    <script src="/status.js"></script>
+    <script src="/vulnerabilities.js"></script>
+  </body>
+</html>

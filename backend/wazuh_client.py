@@ -39,6 +39,9 @@ class WazuhClient:
             return env_url.rstrip("/")
 
         settings = self._load_settings()
+        settings_url = settings.get("wazuh_api_url")
+        if settings_url:
+            return settings_url.rstrip("/")
         manager_ip = settings.get("wazuh_manager_ip") or "localhost"
         return f"https://{manager_ip}:55000"
 

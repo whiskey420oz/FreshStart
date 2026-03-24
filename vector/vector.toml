@@ -1,0 +1,23 @@
+[sources.wazuh_syslog]
+type = "syslog"
+address = "0.0.0.0:1514"
+mode = "udp"
+
+[transforms.extract_json]
+type = "remap"
+inputs = ["wazuh_syslog"]
+source = """
+.message = parse_json!(.message)
+"""
+
+[sinks.redis_queue]
+type = "redis"
+inputs = ["extract_json"]
+endpoint = "redis://127.0.0.1:6379"
+method = "list"
+key = "alerts_queue"
+encoding.codec = "json"
+
+[sinks.redis_queue.buffer]
+type = "disk"
+max_size = 10737418240

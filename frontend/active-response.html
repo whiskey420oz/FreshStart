@@ -7,57 +7,106 @@
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <nav class="navbar">
-      <div class="nav-left">
-        <span class="brand">FreshStart SOC</span>
-        <div class="nav-links">
-          <a href="/index.html">Dashboard</a>
-          <a href="/alerts.html">Alerts</a>
-          <a href="/investigations.html">Investigations</a>
-          <a href="/assets.html">Assets</a>
-          <a href="/active-response.html" class="active">Active Response</a>
-          <a href="/settings.html">Settings</a>
+    <div class="layout">
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <span class="brand">FreshStart SOC</span>
+          <button id="toggle-sidebar" class="ghost icon-button" type="button">|||</button>
+        </div>
+        <nav class="sidebar-nav">
+          <div class="sidebar-section">SOC Monitoring</div>
+          <a href="/index.html" data-tooltip="Dashboard"><span class="nav-icon icon-dashboard" aria-hidden="true"></span><span class="label">Dashboard</span></a>
+          <a href="/alerts.html" data-tooltip="Alerts"><span class="nav-icon icon-alerts" aria-hidden="true"></span><span class="label">Alerts</span></a>
+          <a href="/investigations.html" data-tooltip="Investigations"><span class="nav-icon icon-investigations" aria-hidden="true"></span><span class="label">Investigations</span></a>
+          <a href="/incidents.html" data-tooltip="Incidents"><span class="nav-icon icon-incidents" aria-hidden="true"></span><span class="label">Incidents</span></a>
+          <div class="sidebar-section">Infrastructure</div>
+          <a href="/agents.html#/agents" data-tooltip="Agents"><span class="nav-icon icon-agents" aria-hidden="true"></span><span class="label">Agents</span></a>
+          <a href="/assets.html" data-tooltip="Assets"><span class="nav-icon icon-assets" aria-hidden="true"></span><span class="label">Assets</span></a>
+          <a href="/file-integrity.html" data-tooltip="File Integrity"><span class="nav-icon icon-integrity" aria-hidden="true"></span><span class="label">File Integrity</span></a>
+          <div class="sidebar-section">Threat Intel</div>
+          <a href="/vulnerabilities.html" data-tooltip="Vulnerabilities"><span class="nav-icon icon-vuln" aria-hidden="true"></span><span class="label">Vulnerabilities</span></a>
+          <a href="/threat-intel.html" data-tooltip="Threat Intel"><span class="nav-icon icon-intel" aria-hidden="true"></span><span class="label">Threat Intel</span></a>
+          <a href="/index.html#attack-map" data-tooltip="Attack Map"><span class="nav-icon icon-map" aria-hidden="true"></span><span class="label">Attack Map</span></a>
+          <div class="sidebar-section">Response</div>
+          <a href="/active-response.html" class="active" data-tooltip="Active Response"><span class="nav-icon icon-response" aria-hidden="true"></span><span class="label">Active Response</span></a>
+          <div class="sidebar-section">Administration</div>
+          <a href="/settings.html" data-tooltip="Settings"><span class="nav-icon icon-settings" aria-hidden="true"></span><span class="label">Settings</span></a>
+        </nav>
+      </aside>
+
+      <div id="app-content" class="main">
+        <header class="topbar">
+          <div id="status-system" class="status-pill">
+            <span class="status-dot"></span>
+            <span class="status-text">System: —</span>
+          </div>
+          <div id="status-wazuh" class="status-pill">
+            <span class="status-dot"></span>
+            <span class="status-text">Wazuh API: —</span>
+          </div>
+          <div id="status-redis" class="status-pill">
+            <span class="status-dot"></span>
+            <span class="status-text">Redis: —</span>
+          </div>
+          <div id="status-worker" class="status-pill">
+            <span class="status-dot"></span>
+            <span class="status-text">Worker: —</span>
+          </div>
+        </header>
+
+        <div class="page-shell">
+          <header class="page-header">
+            <div>
+              <p class="eyebrow">Response Orchestration</p>
+              <h1>Active Response</h1>
+              <p class="hero-copy">Trigger defensive actions and track response activity from the SOC.</p>
+            </div>
+          </header>
+
+          <div class="analytics-panels grid-two">
+            <section class="panel">
+              <div class="panel-head">
+                <h2>Block Suspicious IP</h2>
+              </div>
+              <div class="form-row">
+                <label for="block-ip-input">Target IP</label>
+                <input id="block-ip-input" type="text" placeholder="e.g. 185.220.101.5" />
+              </div>
+              <button id="block-ip-button" class="ghost">Block IP</button>
+              <p id="response-message" class="muted"></p>
+            </section>
+
+            <section class="panel">
+              <div class="panel-head">
+                <h2>Response History</h2>
+                <span id="responses-updated" class="muted">Last updated: —</span>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Timestamp</th>
+                      <th>Action</th>
+                      <th>Target</th>
+                      <th>Analyst</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="responses-body">
+                    <tr>
+                      <td colspan="5" class="muted">Loading responses...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </div>
         </div>
       </div>
-      <div class="nav-right">
-        <div class="status-chip">
-          <span class="status-dot live"></span>
-          System Status: Live
-        </div>
-        <div class="status-chip">
-          <span class="status-dot warn"></span>
-          Wazuh: Connected
-        </div>
-        <div class="status-chip">Response Mode: Detect Only</div>
-        <span class="pill live-badge">Live</span>
-      </div>
-    </nav>
-
-    <div class="page-shell">
-      <header class="page-header">
-        <div>
-          <p class="eyebrow">Active Response</p>
-          <h1>Response Actions</h1>
-          <p class="hero-copy">Trigger automated containment actions through Wazuh.</p>
-        </div>
-      </header>
-
-      <section class="panel">
-        <div class="panel-head">
-          <h2>Block IP Address</h2>
-          <span class="muted">Send an active response to Wazuh</span>
-        </div>
-        <div class="response-form">
-          <label class="filter-field">
-            <span>IP Address</span>
-            <input id="block-ip-input" type="text" placeholder="192.168.1.50" />
-          </label>
-          <button id="block-ip-button" class="ghost">Block IP</button>
-        </div>
-        <div id="response-message" class="response-message muted"></div>
-      </section>
     </div>
 
+    <script src="/auth.js"></script>
+    <script src="/status.js?v=1"></script>
     <script src="/active-response.js"></script>
   </body>
 </html>

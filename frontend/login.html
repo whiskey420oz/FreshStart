@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FreshStart SOC - Sign In</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="auth-page">
+    <div class="auth-shell">
+      <div class="auth-card">
+        <div class="auth-header">
+          <span class="brand">FreshStart SOC</span>
+          <p class="muted">Sign in to access the SOC console.</p>
+          <p class="muted small">Host: <span id="login-host-hint"></span></p>
+        </div>
+        <form id="login-form" class="auth-form">
+          <label class="filter-field">
+            Username
+            <input id="login-username" type="text" autocomplete="username" />
+          </label>
+          <label class="filter-field">
+            Password
+            <input id="login-password" type="password" autocomplete="current-password" />
+          </label>
+          <button class="ghost" type="submit">Sign In</button>
+          <p id="login-error" class="error-text"></p>
+        </form>
+      </div>
+    </div>
+    <script src="/auth.js"></script>
+  </body>
+</html>

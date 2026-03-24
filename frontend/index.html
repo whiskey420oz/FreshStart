@@ -13,47 +13,73 @@
     />
   </head>
   <body>
-    <div id="app-content">
-      <nav class="navbar">
-        <div class="nav-left">
+    <div class="layout">
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
           <span class="brand">FreshStart SOC</span>
-          <div class="nav-links">
-            <a href="/index.html" class="active">Dashboard</a>
-            <a href="/alerts.html">Alerts</a>
-            <a href="/investigations.html">Investigations</a>
-            <a href="/assets.html">Assets</a>
-            <a href="/active-response.html">Active Response</a>
-            <a href="/settings.html">Settings</a>
-          </div>
+          <button id="toggle-sidebar" class="ghost icon-button" type="button">|||</button>
         </div>
-        <div class="nav-right">
-          <div class="status-chip">
-            <span class="status-dot live"></span>
-            System Status: Live
+        <nav class="sidebar-nav">
+          <div class="sidebar-section">SOC Monitoring</div>
+          <a href="/index.html" class="active" data-tooltip="Dashboard"><span class="nav-icon icon-dashboard" aria-hidden="true"></span><span class="label">Dashboard</span></a>
+          <a href="/alerts.html" data-tooltip="Alerts"><span class="nav-icon icon-alerts" aria-hidden="true"></span><span class="label">Alerts</span></a>
+          <a href="/investigations.html" data-tooltip="Investigations"><span class="nav-icon icon-investigations" aria-hidden="true"></span><span class="label">Investigations</span></a>
+          <a href="/incidents.html" data-tooltip="Incidents"><span class="nav-icon icon-incidents" aria-hidden="true"></span><span class="label">Incidents</span></a>
+          <div class="sidebar-section">Infrastructure</div>
+          <a href="/agents.html#/agents" data-tooltip="Agents"><span class="nav-icon icon-agents" aria-hidden="true"></span><span class="label">Agents</span></a>
+          <a href="/assets.html" data-tooltip="Assets"><span class="nav-icon icon-assets" aria-hidden="true"></span><span class="label">Assets</span></a>
+          <a href="/file-integrity.html" data-tooltip="File Integrity"><span class="nav-icon icon-integrity" aria-hidden="true"></span><span class="label">File Integrity</span></a>
+          <div class="sidebar-section">Threat Intel</div>
+          <a href="/vulnerabilities.html" data-tooltip="Vulnerabilities"><span class="nav-icon icon-vuln" aria-hidden="true"></span><span class="label">Vulnerabilities</span></a>
+          <a href="/threat-intel.html" data-tooltip="Threat Intel"><span class="nav-icon icon-intel" aria-hidden="true"></span><span class="label">Threat Intel</span></a>
+          <a href="/index.html#attack-map" data-tooltip="Attack Map"><span class="nav-icon icon-map" aria-hidden="true"></span><span class="label">Attack Map</span></a>
+          <div class="sidebar-section">Response</div>
+          <a href="/active-response.html" data-tooltip="Active Response"><span class="nav-icon icon-response" aria-hidden="true"></span><span class="label">Active Response</span></a>
+          <div class="sidebar-section">Administration</div>
+          <a href="/settings.html" data-tooltip="Settings"><span class="nav-icon icon-settings" aria-hidden="true"></span><span class="label">Settings</span></a>
+        </nav>
+      </aside>
+
+      <div id="app-content" class="main">
+        <header class="topbar">
+          <div id="status-system" class="status-pill">
+            <span class="status-dot"></span>
+            <span class="status-text">System: —</span>
           </div>
-          <div class="status-chip">
-            <span class="status-dot warn"></span>
-            Wazuh: Connected
+          <div id="status-wazuh" class="status-pill">
+            <span class="status-dot"></span>
+            <span class="status-text">Wazuh API: —</span>
           </div>
-          <div class="status-chip">
-            Response Mode: Detect Only
+          <div id="status-redis" class="status-pill">
+            <span class="status-dot"></span>
+            <span class="status-text">Redis: —</span>
+          </div>
+          <div id="status-worker" class="status-pill">
+            <span class="status-dot"></span>
+            <span class="status-text">Worker: —</span>
           </div>
           <span id="stream-status" class="pill live-badge">Live</span>
+          <span id="user-pill" class="pill">User: —</span>
           <button id="lock-button" class="ghost lock-button" type="button">Lock</button>
-        </div>
-      </nav>
+          <button id="logout-button" class="ghost" type="button">Logout</button>
+        </header>
 
-      <div class="page-shell">
-      <header class="page-header">
-        <div>
-          <p class="eyebrow">Security Operations Center</p>
-          <h1>Security Operations Dashboard</h1>
-          <p class="hero-copy">Real-time threat detection, monitoring, and automated response.</p>
-        </div>
-      </header>
+        <div class="page-shell">
+          <header class="page-header">
+            <div>
+              <p class="eyebrow">Security Operations Center</p>
+              <h1>Security Operations Dashboard</h1>
+              <p class="hero-copy">Real-time threat detection, monitoring, and automated response.</p>
+            </div>
+          </header>
 
-      <section class="metrics-panels metrics-grid">
-        <div class="metric-card critical">
+      <section class="zone">
+        <div class="zone-head">
+          <h2>Security Metrics</h2>
+        </div>
+        <div class="metrics-panels metrics-grid primary-metrics">
+        <div class="metric-card critical metric-alerts">
+          <span class="metric-icon icon-alerts" aria-hidden="true"></span>
           <span class="metric-label">Total Alerts</span>
           <div class="metric-value">
             <span id="metric-total">0</span>
@@ -61,7 +87,8 @@
           </div>
           <span class="metric-subtitle">▲ +14 last hour</span>
         </div>
-        <div class="metric-card critical">
+        <div class="metric-card critical metric-alerts">
+          <span class="metric-icon icon-critical" aria-hidden="true"></span>
           <span class="metric-label">Critical Alerts</span>
           <div class="metric-value">
             <span id="metric-critical">0</span>
@@ -69,7 +96,8 @@
           </div>
           <span class="metric-subtitle">▲ +4 last hour</span>
         </div>
-        <div class="metric-card high">
+        <div class="metric-card high metric-alerts">
+          <span class="metric-icon icon-high" aria-hidden="true"></span>
           <span class="metric-label">High Severity Alerts</span>
           <div class="metric-value">
             <span id="metric-high">0</span>
@@ -77,15 +105,8 @@
           </div>
           <span class="metric-subtitle">▲ +9 last hour</span>
         </div>
-        <div class="metric-card low">
-          <span class="metric-label">Active Agents</span>
-          <div class="metric-value">
-            <span id="metric-agents">0</span>
-            <span class="metric-trend">▲</span>
-          </div>
-          <span class="metric-subtitle">▲ +2 last hour</span>
-        </div>
-        <div class="metric-card medium">
+        <div class="metric-card low metric-alerts">
+          <span class="metric-icon icon-radar" aria-hidden="true"></span>
           <span class="metric-label">Suspicious IPs</span>
           <div class="metric-value">
             <span id="metric-suspicious">0</span>
@@ -93,7 +114,8 @@
           </div>
           <span class="metric-subtitle">▲ +3 last hour</span>
         </div>
-        <div class="metric-card low">
+        <div class="metric-card low metric-alerts">
+          <span class="metric-icon icon-activity" aria-hidden="true"></span>
           <span class="metric-label">Events Processed</span>
           <div class="metric-value">
             <span id="metric-events">0</span>
@@ -101,10 +123,38 @@
           </div>
           <span class="metric-subtitle">Events processed in system</span>
         </div>
-      </section>
+        </div>
 
-      <section class="metrics-panels metrics-grid">
+        <div class="metrics-panels metrics-grid secondary-metrics">
+        <div class="metric-card low">
+          <span class="metric-icon icon-agents" aria-hidden="true"></span>
+          <span class="metric-label">Active Agents</span>
+          <div class="metric-value">
+            <span id="metric-agents-active">0</span>
+            <span class="metric-trend">▲</span>
+          </div>
+          <span class="metric-subtitle">Connected to Wazuh</span>
+        </div>
+        <div class="metric-card high">
+          <span class="metric-icon icon-disconnected" aria-hidden="true"></span>
+          <span class="metric-label">Disconnected Agents</span>
+          <div class="metric-value">
+            <span id="metric-agents-disconnected">0</span>
+            <span class="metric-trend">▼</span>
+          </div>
+          <span class="metric-subtitle">Awaiting keepalive</span>
+        </div>
+        <div class="metric-card medium">
+          <span class="metric-icon icon-offline" aria-hidden="true"></span>
+          <span class="metric-label">Never Connected</span>
+          <div class="metric-value">
+            <span id="metric-agents-never">0</span>
+            <span class="metric-trend">—</span>
+          </div>
+          <span class="metric-subtitle">Agents not yet enrolled</span>
+        </div>
         <div class="metric-card">
+          <span class="metric-icon icon-investigations" aria-hidden="true"></span>
           <span class="metric-label">Open Investigations</span>
           <div class="metric-value">
             <span id="metric-open-cases">0</span>
@@ -112,7 +162,17 @@
           </div>
           <span class="metric-subtitle">Active SOC cases</span>
         </div>
+        <div class="metric-card critical">
+          <span class="metric-icon icon-alerts" aria-hidden="true"></span>
+          <span class="metric-label">Open Incidents</span>
+          <div class="metric-value">
+            <span id="metric-incidents-open">0</span>
+            <span class="metric-trend">▲</span>
+          </div>
+          <span class="metric-subtitle">Awaiting response</span>
+        </div>
         <div class="metric-card">
+          <span class="metric-icon icon-check" aria-hidden="true"></span>
           <span class="metric-label">Alerts Resolved Today</span>
           <div class="metric-value">
             <span id="metric-resolved-today">0</span>
@@ -120,7 +180,17 @@
           </div>
           <span class="metric-subtitle">Closed in last 24h</span>
         </div>
+        <div class="metric-card medium">
+          <span class="metric-icon icon-check" aria-hidden="true"></span>
+          <span class="metric-label">Contained Incidents</span>
+          <div class="metric-value">
+            <span id="metric-incidents-contained">0</span>
+            <span class="metric-trend">—</span>
+          </div>
+          <span class="metric-subtitle">Isolated and stabilized</span>
+        </div>
         <div class="metric-card">
+          <span class="metric-icon icon-clock" aria-hidden="true"></span>
           <span class="metric-label">Mean Time to Respond</span>
           <div class="metric-value">
             <span id="metric-mttr">—</span>
@@ -129,6 +199,7 @@
           <span class="metric-subtitle">Awaiting case data</span>
         </div>
         <div class="metric-card">
+          <span class="metric-icon icon-analyst" aria-hidden="true"></span>
           <span class="metric-label">Active Analysts</span>
           <div class="metric-value">
             <span id="metric-analysts">1</span>
@@ -136,9 +207,95 @@
           </div>
           <span class="metric-subtitle">On console now</span>
         </div>
+        </div>
       </section>
 
-      <section class="analytics-panels grid-two">
+      <section class="zone">
+        <div class="zone-head">
+          <h2>Global SOC Status</h2>
+        </div>
+        <div class="analytics-panels grid-two">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Wazuh Manager</h2>
+            <span id="wazuh-api-status" class="status-indicator active">Connected</span>
+          </div>
+          <div class="status-list">
+            <div>
+              <span class="muted">Version</span>
+              <strong id="wazuh-version">—</strong>
+            </div>
+            <div>
+              <span class="muted">Manager Health</span>
+              <strong id="wazuh-health">—</strong>
+            </div>
+            <div>
+              <span class="muted">Total Agents</span>
+              <strong id="wazuh-total-agents">0</strong>
+            </div>
+            <div>
+              <span class="muted">API Connectivity</span>
+              <strong id="wazuh-api-connectivity">Connected</strong>
+            </div>
+          </div>
+          <p id="wazuh-error" class="muted"></p>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Agent Monitoring</h2>
+            <span class="muted">Summary from Wazuh API</span>
+          </div>
+          <div class="status-list">
+            <div>
+              <span class="muted">Active Agents</span>
+              <strong id="wazuh-summary-active">0</strong>
+            </div>
+            <div>
+              <span class="muted">Disconnected</span>
+              <strong id="wazuh-summary-disconnected">0</strong>
+            </div>
+            <div>
+              <span class="muted">Never Connected</span>
+              <strong id="wazuh-summary-never">0</strong>
+            </div>
+            <div>
+              <span class="muted">Total</span>
+              <strong id="wazuh-summary-total">0</strong>
+            </div>
+          </div>
+        </div>
+        </div>
+      </section>
+
+      <section class="zone">
+        <div class="zone-head">
+          <h2>Threat Intelligence & Analytics</h2>
+        </div>
+      <div class="analytics-panels grid-two">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Recent Alerts (Normalized)</h2>
+            <span id="wazuh-alerts-updated" class="muted">Last updated: —</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Agent</th>
+                  <th>Rule</th>
+                  <th>Severity</th>
+                  <th>Source IP</th>
+                </tr>
+              </thead>
+              <tbody id="wazuh-alerts-body">
+                <tr>
+                  <td colspan="5" class="muted">Loading Wazuh alerts...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
         <div class="panel">
           <div class="panel-head">
             <h2>Alerts by Severity</h2>
@@ -153,7 +310,99 @@
           </div>
           <canvas id="timeline-chart" height="180"></canvas>
         </div>
-      </section>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Top Triggered Rules</h2>
+            <span id="updated-rules" class="muted">Last updated: —</span>
+          </div>
+          <canvas id="rules-chart" height="180"></canvas>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Rule</th>
+                  <th>Alerts</th>
+                  <th>Severity</th>
+                </tr>
+              </thead>
+              <tbody id="top-rules-body"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Attacker Intelligence</h2>
+            <span id="updated-attackers" class="muted">Last updated: —</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Source IP</th>
+                  <th>Country</th>
+                  <th>Alerts</th>
+                  <th>Targets</th>
+                  <th>Top Types</th>
+                  <th>Last Seen</th>
+                </tr>
+              </thead>
+              <tbody id="attackers-body">
+                <tr>
+                  <td colspan="6" class="muted">Loading attacker profiles...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>MITRE ATT&amp;CK Coverage</h2>
+            <span id="updated-mitre" class="muted">Last updated: —</span>
+          </div>
+          <canvas id="mitre-chart" height="160"></canvas>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Technique</th>
+                  <th>Count</th>
+                  <th>Tactics</th>
+                </tr>
+              </thead>
+              <tbody id="mitre-body">
+                <tr>
+                  <td colspan="3" class="muted">Loading MITRE data...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Top Risk Scores</h2>
+            <span id="updated-risk" class="muted">Last updated: —</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Host</th>
+                  <th>Risk Score</th>
+                  <th>Critical</th>
+                  <th>High</th>
+                  <th>Medium</th>
+                  <th>Last Seen</th>
+                </tr>
+              </thead>
+              <tbody id="risk-body">
+                <tr>
+                  <td colspan="6" class="muted">Loading risk scores...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
       <section class="analytics-panels panel">
         <div class="panel-head">
@@ -162,43 +411,13 @@
         </div>
         <div id="attack-map"></div>
       </section>
-
-      <section class="analytics-panels grid-two">
-        <div class="panel">
-          <div class="panel-head">
-            <h2>Top Attacking IPs</h2>
-            <span id="updated-attackers" class="muted">Last updated: —</span>
-          </div>
-          <table>
-            <thead>
-              <tr>
-                <th>Source IP</th>
-                <th>Count</th>
-                <th>Severity</th>
-              </tr>
-            </thead>
-            <tbody id="top-attackers-body"></tbody>
-          </table>
-        </div>
-        <div class="panel">
-          <div class="panel-head">
-            <h2>Top Triggered Rules</h2>
-            <span id="updated-rules" class="muted">Last updated: —</span>
-          </div>
-          <table>
-            <thead>
-              <tr>
-                <th>Rule</th>
-                <th>Alerts</th>
-                <th>Severity</th>
-              </tr>
-            </thead>
-            <tbody id="top-rules-body"></tbody>
-          </table>
-        </div>
       </section>
 
-      <section class="analytics-panels panel">
+      <section class="zone">
+        <div class="zone-head">
+          <h2>Live Activity Feed</h2>
+        </div>
+      <div class="analytics-panels panel">
         <div class="panel-head">
           <h2>Live Attack Timeline</h2>
           <p class="muted">Streaming newest alerts as they arrive · <span id="updated-live">Last updated: —</span></p>
@@ -206,9 +425,17 @@
         <div id="attack-timeline" class="attack-timeline">
           <div class="timeline-empty muted">No alerts received yet.</div>
         </div>
-      </section>
+      </div>
 
-      <section class="alert-stream grid-two">
+      <div class="analytics-panels panel">
+        <div class="panel-head">
+          <h2>Incident Timeline</h2>
+          <p class="muted">Incidents created in the last 24h · <span id="updated-incident-timeline">Last updated: —</span></p>
+        </div>
+        <canvas id="incident-timeline-chart" height="160"></canvas>
+      </div>
+
+      <div class="alert-stream grid-two activity-grid">
         <div class="panel">
           <div class="panel-head">
             <h2>Risky Hosts</h2>
@@ -228,6 +455,30 @@
         </div>
         <div class="panel">
           <div class="panel-head">
+            <h2>Incident Queue</h2>
+            <span id="updated-incidents" class="muted">Last updated: —</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Type</th>
+                  <th>Severity</th>
+                  <th>Source IP</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="incidents-body">
+                <tr>
+                  <td colspan="5" class="muted">Loading incidents...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
             <h2>Latest Alerts Stream</h2>
             <span id="updated-stream" class="muted">Last updated: —</span>
           </div>
@@ -242,19 +493,20 @@
                   <th>Severity</th>
                   <th>Agent</th>
                   <th>Source IP</th>
+                  <th>MITRE</th>
                 </tr>
               </thead>
               <tbody id="alerts-body">
                 <tr>
-                  <td colspan="6" class="muted">Waiting for syslog alerts...</td>
+                  <td colspan="7" class="muted">Waiting for syslog alerts...</td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
-      </section>
+      </div>
 
-      <section class="analytics-panels grid-two">
+      <div class="analytics-panels grid-two activity-grid">
         <div class="panel">
           <div class="panel-head">
             <h2>Recent SOC Activity</h2>
@@ -283,7 +535,9 @@
             </div>
           </div>
         </div>
+      </div>
       </section>
+    </div>
       </div>
     </div>
 
@@ -306,6 +560,8 @@
       integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
       crossorigin=""
     ></script>
-    <script src="/dashboard.js"></script>
+    <script src="/auth.js?v=2"></script>
+    <script src="/status.js?v=2"></script>
+    <script src="/dashboard.js?v=2"></script>
   </body>
 </html>

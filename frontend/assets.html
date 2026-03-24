@@ -7,44 +7,126 @@
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <nav class="navbar">
-      <div class="nav-left">
-        <span class="brand">FreshStart SOC</span>
-        <div class="nav-links">
-          <a href="/index.html">Dashboard</a>
-          <a href="/alerts.html">Alerts</a>
-          <a href="/investigations.html">Investigations</a>
-          <a href="/assets.html" class="active">Assets</a>
-          <a href="/active-response.html">Active Response</a>
-          <a href="/settings.html">Settings</a>
+    <div class="layout">
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <span class="brand">FreshStart SOC</span>
+          <button id="toggle-sidebar" class="ghost icon-button" type="button">|||</button>
         </div>
-      </div>
-      <div class="nav-right">
-        <div class="status-chip">
-          <span class="status-dot live"></span>
-          System Status: Live
-        </div>
-        <div class="status-chip">
-          <span class="status-dot warn"></span>
-          Wazuh: Connected
-        </div>
-        <div class="status-chip">Response Mode: Detect Only</div>
-        <span class="pill live-badge">Live</span>
-      </div>
-    </nav>
+        <nav class="sidebar-nav">
+          <div class="sidebar-section">SOC Monitoring</div>
+          <a href="/index.html" data-tooltip="Dashboard"><span class="nav-icon icon-dashboard" aria-hidden="true"></span><span class="label">Dashboard</span></a>
+          <a href="/alerts.html" data-tooltip="Alerts"><span class="nav-icon icon-alerts" aria-hidden="true"></span><span class="label">Alerts</span></a>
+          <a href="/investigations.html" data-tooltip="Investigations"><span class="nav-icon icon-investigations" aria-hidden="true"></span><span class="label">Investigations</span></a>
+          <a href="/incidents.html" data-tooltip="Incidents"><span class="nav-icon icon-incidents" aria-hidden="true"></span><span class="label">Incidents</span></a>
+          <div class="sidebar-section">Infrastructure</div>
+          <a href="/agents.html#/agents" data-tooltip="Agents"><span class="nav-icon icon-agents" aria-hidden="true"></span><span class="label">Agents</span></a>
+          <a href="/assets.html" class="active" data-tooltip="Assets"><span class="nav-icon icon-assets" aria-hidden="true"></span><span class="label">Assets</span></a>
+          <a href="/file-integrity.html" data-tooltip="File Integrity"><span class="nav-icon icon-integrity" aria-hidden="true"></span><span class="label">File Integrity</span></a>
+          <div class="sidebar-section">Threat Intel</div>
+          <a href="/vulnerabilities.html" data-tooltip="Vulnerabilities"><span class="nav-icon icon-vuln" aria-hidden="true"></span><span class="label">Vulnerabilities</span></a>
+          <a href="/threat-intel.html" data-tooltip="Threat Intel"><span class="nav-icon icon-intel" aria-hidden="true"></span><span class="label">Threat Intel</span></a>
+          <a href="/index.html#attack-map" data-tooltip="Attack Map"><span class="nav-icon icon-map" aria-hidden="true"></span><span class="label">Attack Map</span></a>
+          <div class="sidebar-section">Response</div>
+          <a href="/active-response.html" data-tooltip="Active Response"><span class="nav-icon icon-response" aria-hidden="true"></span><span class="label">Active Response</span></a>
+          <div class="sidebar-section">Administration</div>
+          <a href="/settings.html" data-tooltip="Settings"><span class="nav-icon icon-settings" aria-hidden="true"></span><span class="label">Settings</span></a>
+        </nav>
+      </aside>
 
-    <div class="page-shell">
+      <div id="app-content" class="main">
+        <header class="topbar">
+          <div id="status-system" class="status-pill">
+            <span class="status-dot"></span>
+            <span class="status-text">System: —</span>
+          </div>
+          <div id="status-wazuh" class="status-pill">
+            <span class="status-dot"></span>
+            <span class="status-text">Wazuh API: —</span>
+          </div>
+          <div id="status-redis" class="status-pill">
+            <span class="status-dot"></span>
+            <span class="status-text">Redis: —</span>
+          </div>
+          <div id="status-worker" class="status-pill">
+            <span class="status-dot"></span>
+            <span class="status-text">Worker: —</span>
+          </div>
+        </header>
+
+        <div class="page-shell">
       <header class="page-header">
         <div>
           <p class="eyebrow">Asset Inventory</p>
           <h1>Assets</h1>
-          <p class="hero-copy">Monitor every endpoint reporting to Wazuh in real time.</p>
+          <p class="hero-copy">Track managed infrastructure and observed assets from Wazuh alerts.</p>
         </div>
       </header>
 
       <section class="panel">
         <div class="panel-head">
-          <h2>Monitored Endpoints</h2>
+          <h2>Managed Inventory</h2>
+          <span class="muted">Add infrastructure you want to track (firewalls, switches, SaaS).</span>
+        </div>
+        <div id="managed-error" class="error-banner hidden"></div>
+        <div class="form-grid">
+          <label class="filter-field">
+            <span>Name</span>
+            <input id="asset-name" type="text" placeholder="Fortinet FW-01" />
+          </label>
+          <label class="filter-field">
+            <span>Type</span>
+            <input id="asset-type" type="text" placeholder="Firewall" />
+          </label>
+          <label class="filter-field">
+            <span>IP Address</span>
+            <input id="asset-ip" type="text" placeholder="192.168.33.50" />
+          </label>
+          <label class="filter-field">
+            <span>Owner</span>
+            <input id="asset-owner" type="text" placeholder="Network Team" />
+          </label>
+          <label class="filter-field">
+            <span>Criticality</span>
+            <select id="asset-criticality">
+              <option value="">Select</option>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+              <option value="critical">Critical</option>
+            </select>
+          </label>
+          <label class="filter-field">
+            <span>Notes</span>
+            <input id="asset-notes" type="text" placeholder="Edge firewall for HQ" />
+          </label>
+        </div>
+        <button id="asset-create" class="ghost">Add Asset</button>
+        <div class="table-wrap">
+          <table class="alert-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>IP Address</th>
+                <th>Owner</th>
+                <th>Criticality</th>
+                <th>Notes</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="managed-body">
+              <tr>
+                <td colspan="7" class="muted">Loading managed assets...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Observed Assets (Wazuh)</h2>
           <span class="muted">Refreshes every 10 seconds</span>
         </div>
         <div id="assets-error" class="error-banner hidden"></div>
@@ -66,8 +148,12 @@
           </table>
         </div>
       </section>
+        </div>
+      </div>
     </div>
 
+    <script src="/auth.js"></script>
+    <script src="/status.js"></script>
     <script src="/assets.js"></script>
   </body>
 </html>

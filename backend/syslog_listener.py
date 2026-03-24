@@ -1,8 +1,11 @@
-﻿import json
+import json
 import logging
 import socketserver
 import threading
+import os
 from typing import Callable, Optional
+
+from redis_queue.redis_client import get_client
 
 
 logger = logging.getLogger("freshstart.syslog")
@@ -21,24 +24,9 @@ def _extract_json(payload: str) -> Optional[dict]:
         return None
 
 
-def _normalize_alert(raw: dict) -> dict:
-    # Normalize the syslog JSON into the dashboard schema.
-    agent = raw.get("agent", {})
-    rule = raw.get("rule", {})
-    data = raw.get("data", {}) if isinstance(raw.get("data"), dict) else {}
-    source_ip = data.get("srcip") or raw.get("srcip")
-
-    return {
-        "timestamp": raw.get("timestamp") or raw.get("@timestamp") or "Unknown",
-        "rule_id": rule.get("id") or "Unknown",
-        "rule_description": rule.get("description") or raw.get("full_log") or "No description",
-        "rule_level": int(rule.get("level", 0) or 0),
-        "agent_name": agent.get("name") or "Unknown agent",
-        "agent_ip": agent.get("ip") or "N/A",
-        "source_ip": source_ip,
-        "src_ip": source_ip,
-        "protocol": data.get("proto") or data.get("protocol") or raw.get("protocol") or "N/A",
-    }
+def enqueue_alert(alert: dict) -> None:
+    client = get_client()
+    client.lpush("alerts_queue", json.dumps(alert))
 
 
 class SyslogUDPHandler(socketserver.BaseRequestHandler):
@@ -46,34 +34,82 @@ class SyslogUDPHandler(socketserver.BaseRequestHandler):
         data = self.request[0]
         message = data.decode("utf-8", errors="ignore")
         logger.debug("UDP packet received: %s", message)
+        if os.getenv("SYSLOG_DEBUG", "").lower() in {"1", "true", "yes"}:
+            logger.info("UDP raw syslog: %s", message[:500])
 
         logger.debug("Attempting JSON extraction from syslog payload.")
         payload = _extract_json(message)
         if not payload:
+            logger.warning("UDP syslog JSON extraction failed. Sample: %s", message[:300])
             logger.warning("Received invalid JSON syslog message.")
             return
 
-        alert = _normalize_alert(payload)
+        print("Alert received from Wazuh")
         if callable(self.server.on_alert):
-            self.server.on_alert(alert)
-        logger.info("Alert received: rule=%s agent=%s", alert.get("rule_id"), alert.get("agent_name"))
+            self.server.on_alert(payload)
+        print("Alert pushed to Redis queue")
+        logger.info("Alert received: payload keys=%s", list(payload.keys()))
+
+
+class SyslogTCPHandler(socketserver.BaseRequestHandler):
+    def handle(self):
+        try:
+            data = self.request.recv(65535)
+        except Exception:
+            return
+        if not data:
+            return
+        message = data.decode("utf-8", errors="ignore")
+        logger.debug("TCP packet received: %s", message)
+        if os.getenv("SYSLOG_DEBUG", "").lower() in {"1", "true", "yes"}:
+            logger.info("TCP raw syslog: %s", message[:500])
+
+        logger.debug("Attempting JSON extraction from syslog TCP payload.")
+        payload = _extract_json(message)
+        if not payload:
+            logger.warning("TCP syslog JSON extraction failed. Sample: %s", message[:300])
+            logger.warning("Received invalid JSON syslog message over TCP.")
+            return
+
+        print("Alert received from Wazuh (TCP)")
+        if callable(self.server.on_alert):
+            self.server.on_alert(payload)
+        print("Alert pushed to Redis queue")
+        logger.info("Alert received over TCP: payload keys=%s", list(payload.keys()))
 
 
 class SyslogListener:
     def __init__(self, host: str = "0.0.0.0", port: int = 1514, on_alert: Optional[Callable[[dict], None]] = None):
         self.host = host
         self.port = port
-        self._server = socketserver.ThreadingUDPServer((self.host, self.port), SyslogUDPHandler)
-        self._server.on_alert = on_alert
-        self._thread: Optional[threading.Thread] = None
+        self._udp_server = socketserver.ThreadingUDPServer((self.host, self.port), SyslogUDPHandler)
+        self._udp_server.on_alert = on_alert or enqueue_alert
+        self._tcp_server = socketserver.ThreadingTCPServer((self.host, self.port), SyslogTCPHandler)
+        self._tcp_server.on_alert = on_alert or enqueue_alert
+        self._udp_thread: Optional[threading.Thread] = None
+        self._tcp_thread: Optional[threading.Thread] = None
 
     def start(self):
-        if self._thread and self._thread.is_alive():
+        if self._udp_thread and self._udp_thread.is_alive():
             return
-        self._thread = threading.Thread(target=self._server.serve_forever, daemon=True)
-        self._thread.start()
-        logger.info("Syslog listener running on UDP port %s", self.port)
+        self._udp_thread = threading.Thread(target=self._udp_server.serve_forever, daemon=True)
+        self._tcp_thread = threading.Thread(target=self._tcp_server.serve_forever, daemon=True)
+        self._udp_thread.start()
+        self._tcp_thread.start()
+        logger.info("Syslog listener running on UDP/TCP port %s", self.port)
 
     def stop(self):
-        self._server.shutdown()
-        self._server.server_close()
+        self._udp_server.shutdown()
+        self._udp_server.server_close()
+        self._tcp_server.shutdown()
+        self._tcp_server.server_close()
+
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+    listener = SyslogListener()
+    listener.start()
+    try:
+        threading.Event().wait()
+    except KeyboardInterrupt:
+        listener.stop()

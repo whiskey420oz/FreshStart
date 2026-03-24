@@ -1,4 +1,13 @@
 wazuh_manager_ip: 192.168.33.101
+wazuh_api_url: https://192.168.33.101:55000
+wazuh_alerts_path: /alerts
 syslog_port: 1514
 database_type: memory
 response_mode: Detect Only
+redis_host: 192.168.33.101
+redis_port: 6379
+opensearch_url: https://192.168.33.101:9200
+opensearch_user: admin
+opensearch_password: xeNwknCZ6xqsDd7.2n940Fi8IVKw4xj8
+opensearch_index: wazuh-alerts-*
+opensearch_events_index: freshstart-events

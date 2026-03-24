@@ -10,6 +10,7 @@ const DRAWER_CLOSE = document.getElementById("drawer-close");
 const DRAWER_JSON = document.getElementById("drawer-json");
 const DRAWER_SUMMARY = document.getElementById("drawer-summary");
 const DRAWER_STATUS = document.getElementById("drawer-status");
+const CREATE_INCIDENT = document.getElementById("create-incident");
 const PAGINATION_INFO = document.getElementById("pagination-info");
 const PAGINATION_CONTROLS = document.getElementById("pagination-controls");
 
@@ -17,7 +18,6 @@ const REFRESH_INTERVAL = 5000;
 const PAGE_LIMIT = 20;
 let currentAlerts = [];
 let sortMode = "timestamp";
-const statusMap = new Map();
 let selectedAlertId = null;
 let selectedAlert = null;
 let totalAlerts = 0;
@@ -56,24 +56,35 @@ function clearError() {
   ERROR_BANNER.classList.add("hidden");
 }
 
-function alertKey(alert) {
-  const timestamp = alert.timestamp || "unknown";
-  const ruleId = alert.rule_id || "unknown";
-  return `alert_${timestamp}_${ruleId}`;
-}
-
 function openDrawer(alert) {
-  selectedAlertId = alertKey(alert);
+  selectedAlertId = alert.id;
   selectedAlert = alert;
-  const status = getStoredStatus(selectedAlertId);
-  DRAWER_STATUS.value = status;
+  DRAWER_STATUS.value = alert.alert_status || "NEW";
+  let mitreLine = `<div><strong>MITRE:</strong> —</div>`;
+  if (alert.mitre_ids) {
+    try {
+      const ids = Array.isArray(alert.mitre_ids) ? alert.mitre_ids : JSON.parse(alert.mitre_ids);
+      const tactics = alert.mitre_tactics
+        ? (Array.isArray(alert.mitre_tactics) ? alert.mitre_tactics : JSON.parse(alert.mitre_tactics))
+        : [];
+      mitreLine = `<div><strong>MITRE:</strong> ${ids.join(", ")} ${
+        tactics.length ? `· ${tactics.join(", ")}` : ""
+      }</div>`;
+    } catch {
+      mitreLine = `<div><strong>MITRE:</strong> ${alert.mitre_ids}</div>`;
+    }
+  }
+  const eventTime = alert.event_time || alert.timestamp;
+  const ingestedAt = alert.ingested_at;
   DRAWER_SUMMARY.innerHTML = `
     <div><strong>Rule:</strong> ${alert.rule_description}</div>
     <div><strong>Severity:</strong> ${alert.rule_level}</div>
-    <div><strong>Timestamp:</strong> ${formatTimestamp(alert.timestamp)}</div>
+    <div><strong>Event Time:</strong> ${formatTimestamp(eventTime)}</div>
+    <div><strong>Ingested At:</strong> ${ingestedAt ? formatTimestamp(ingestedAt) : "â€”"}</div>
     <div><strong>Agent:</strong> ${alert.agent_name} (${alert.agent_ip || "N/A"})</div>
     <div><strong>Source IP:</strong> ${alert.src_ip || "N/A"}</div>
     <div><strong>Destination IP:</strong> ${alert.dest_ip || "N/A"}</div>
+    ${mitreLine}
   `;
   DRAWER_JSON.textContent = JSON.stringify(alert, null, 2);
   DRAWER.classList.remove("hidden");
@@ -131,10 +142,15 @@ function renderTable(alerts) {
     .map((alert) => {
       const level = Number(alert.rule_level) || 0;
       const bucket = severityBucket(level);
-      const alertId = alertKey(alert);
-      const status = getStoredStatus(alertId);
+      const status = alert.alert_status || "NEW";
       const statusClass =
-        status === "Resolved" ? "status-resolved" : status === "Investigating" ? "status-investigating" : "status-new";
+        status === "RESOLVED"
+          ? "status-resolved"
+          : status === "INVESTIGATING" || status === "IN_PROGRESS"
+            ? "status-investigating"
+            : status === "FALSE_POSITIVE"
+              ? "status-resolved"
+              : "status-new";
       return `
         <tr class="alert-row">
           <td>${formatTimestamp(alert.timestamp)}</td>
@@ -213,10 +229,6 @@ async function fetchAlerts() {
     if (!response.ok) throw new Error(payload?.error || "Failed to load alerts.");
     currentAlerts = payload.alerts || [];
     totalAlerts = payload.total || currentAlerts.length;
-    loadStoredStatuses(currentAlerts);
-    if (offset === 0) {
-      pruneStoredStatuses(currentAlerts);
-    }
     updateTable();
     renderPagination();
     clearError();
@@ -241,127 +253,49 @@ FILTER_TIMERANGE.addEventListener("change", () => {
   fetchAlerts();
 });
 
+async function updateAlertStatus(status) {
+  if (!selectedAlertId) return;
+  try {
+    let endpoint = null;
+    if (status === "INVESTIGATING") endpoint = `/alerts/${selectedAlertId}/investigate`;
+    if (status === "IN_PROGRESS") endpoint = `/alerts/${selectedAlertId}/in-progress`;
+    if (status === "NEW") endpoint = `/alerts/${selectedAlertId}/new`;
+    if (status === "RESOLVED") endpoint = `/alerts/${selectedAlertId}/resolve`;
+    if (status === "FALSE_POSITIVE") endpoint = `/alerts/${selectedAlertId}/false-positive`;
+    if (!endpoint) return;
+    const response = await fetch(endpoint, { method: "POST" });
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload?.error || "Failed to update alert status.");
+    await fetchAlerts();
+  } catch (error) {
+    showError(error.message || "Failed to update alert status.");
+  }
+}
+
 DRAWER_STATUS.addEventListener("change", () => {
   if (!selectedAlertId) return;
-  setStoredStatus(selectedAlertId, DRAWER_STATUS.value);
-  if (DRAWER_STATUS.value === "Investigating") {
-    let caseId = localStorage.getItem(`alertCase_${selectedAlertId}`);
-    if (!caseId) {
-      caseId = INVESTIGATION_SELECT.value || ensureAutoCase();
-      INVESTIGATION_SELECT.value = caseId;
-    }
-    addAlertToInvestigation(caseId, selectedAlertId, selectedAlert);
-  }
-  updateTable();
+  updateAlertStatus(DRAWER_STATUS.value);
 });
+
+if (CREATE_INCIDENT) {
+  CREATE_INCIDENT.addEventListener("click", async () => {
+    if (!selectedAlertId) return;
+    try {
+      const response = await fetch("/api/incidents/from-alert", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ alert_id: selectedAlertId }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload?.error || "Failed to create incident.");
+      if (payload?.incident_id) {
+        window.location.href = `/incidents.html#incident-${payload.incident_id}`;
+      }
+    } catch (error) {
+      showError(error.message || "Failed to create incident.");
+    }
+  });
+}
 
 fetchAlerts();
 setInterval(fetchAlerts, REFRESH_INTERVAL);
-
-function getStoredStatus(alertId) {
-  if (statusMap.has(alertId)) {
-    return statusMap.get(alertId);
-  }
-  const stored = localStorage.getItem(`alertStatus_${alertId}`);
-  if (stored) {
-    statusMap.set(alertId, stored);
-    return stored;
-  }
-  return "New";
-}
-
-function setStoredStatus(alertId, status) {
-  statusMap.set(alertId, status);
-  localStorage.setItem(`alertStatus_${alertId}`, status);
-}
-
-function loadStoredStatuses(alerts) {
-  alerts.forEach((alert) => {
-    const alertId = alertKey(alert);
-    const stored = localStorage.getItem(`alertStatus_${alertId}`);
-    if (stored) {
-      statusMap.set(alertId, stored);
-    }
-  });
-}
-
-function pruneStoredStatuses(alerts) {
-  const keepKeys = new Set(alerts.slice(0, 100).map(alertKey));
-  Object.keys(localStorage).forEach((key) => {
-    if (key.startsWith("alertStatus_")) {
-      const alertId = key.replace("alertStatus_", "");
-      if (!keepKeys.has(alertId)) {
-        localStorage.removeItem(key);
-        statusMap.delete(alertId);
-      }
-    }
-    if (key.startsWith("alertSnapshot_")) {
-      const alertId = key.replace("alertSnapshot_", "");
-      if (!keepKeys.has(alertId)) {
-        localStorage.removeItem(key);
-      }
-    }
-    if (key.startsWith("alertCase_")) {
-      const alertId = key.replace("alertCase_", "");
-      if (!keepKeys.has(alertId)) {
-        localStorage.removeItem(key);
-      }
-    }
-  });
-}
-
-function loadInvestigations() {
-  const index = JSON.parse(localStorage.getItem("cases_index") || "[]");
-  const options =
-    `<option value="">Select case</option>` +
-    index
-      .map((id) => JSON.parse(localStorage.getItem(`case_${id}`) || "{}"))
-      .filter((item) => item.id)
-      .map((item) => `<option value="${item.id}">${item.title}</option>`)
-      .join("");
-  INVESTIGATION_SELECT.innerHTML = options;
-}
-
-function addAlertToInvestigation(caseId, alertId, alertData) {
-  const caseData = JSON.parse(localStorage.getItem(`case_${caseId}`) || "{}");
-  caseData.alerts = caseData.alerts || [];
-  if (!caseData.alerts.includes(alertId)) {
-    caseData.alerts.push(alertId);
-  }
-  localStorage.setItem(`alertCase_${alertId}`, caseId);
-  if (alertData) {
-    localStorage.setItem(`alertSnapshot_${alertId}`, JSON.stringify(alertData));
-  }
-  localStorage.setItem(`case_${caseId}`, JSON.stringify(caseData));
-}
-
-INVESTIGATION_SELECT.addEventListener("change", () => {
-  if (!selectedAlertId || !selectedAlert) return;
-  addAlertToInvestigation(INVESTIGATION_SELECT.value, selectedAlertId, selectedAlert);
-});
-loadInvestigations();
-
-function ensureAutoCase() {
-  const index = JSON.parse(localStorage.getItem("cases_index") || "[]");
-  const existing = index.find((id) => {
-    const item = JSON.parse(localStorage.getItem(`case_${id}`) || "{}");
-    return item && item.title === "Auto Investigation";
-  });
-  if (existing) return existing;
-
-  const id = Date.now().toString();
-  const caseData = {
-    id,
-    title: "Auto Investigation",
-    description: "Auto-created from Alerts page.",
-    status: "Investigating",
-    created: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    alerts: [],
-    notes: [],
-  };
-  localStorage.setItem(`case_${id}`, JSON.stringify(caseData));
-  const updated = new Set(index);
-  updated.add(id);
-  localStorage.setItem("cases_index", JSON.stringify([...updated]));
-  return id;
-}
